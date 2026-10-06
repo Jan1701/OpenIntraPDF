@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=OpenIntraPDF
+GenericName=PDF-Werkzeug
+GenericName[en]=PDF tool
+Comment=PDF lesen, Seiten ordnen, kommentieren, Text erkennen, exportieren, binden
+Comment[en]=Read, arrange, annotate, recognise text, export and bind PDFs
+Exec=openintrapdf %F
+Icon=openintrapdf
+Terminal=false
+Categories=Office;Viewer;Graphics;
+MimeType=application/pdf;
+Keywords=PDF;OCR;Texterkennung;Kommentar;Seiten;
+StartupNotify=true

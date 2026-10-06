@@ -1,0 +1,9 @@
+OpenIntraPDF
+Copyright 2026 Jan Günther
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product bundles third-party software and fonts under their own licenses
+(MIT, BSD, Apache-2.0, ISC, OFL-1.1 and others). The complete list with all
+license texts is generated at build time (lizenzverzeichnis/) and shown in the
+app under Help → Licenses.

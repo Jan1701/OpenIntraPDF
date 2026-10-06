@@ -1,0 +1,68 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * Farben und Eigenheiten des gemeinsamen Werkzeugbands.
+ *
+ * Der Baustein malt nur mit seinen inneren Größen --rb-*. Jede davon liest
+ * zuerst die öffentliche Größe --werkzeugband-* des Aufrufers (auf irgendeinem
+ * Vorfahren gesetzt) und fällt sonst auf die OIH-Farben zurück, hell wie
+ * dunkel (Klasse `dark` am Dokument). OpenIntraPDF setzt --werkzeugband-* auf
+ * seine --opdf-* (openintrapdf.css) und folgt so seiner eigenen Hell/Dunkel-
+ * Wahl statt der von OIH.
+ *
+ *   --werkzeugband-flaeche    Fläche hinter der Reiterzeile
+ *   --werkzeugband-paneel     das Band (Karte), Menüs
+ *   --werkzeugband-text       Schrift
+ *   --werkzeugband-gedaempft  Gruppennamen, Nebensymbole
+ *   --werkzeugband-akzent     gewählter Reiter, gedrückte Knöpfe
+ *   --werkzeugband-weich      Hover, gedrückte Knöpfe (Grund)
+ *   --werkzeugband-linie      Trenner, Rahmen
+ *   --werkzeugband-schatten   Schatten der Karte und der Menüs
+ */
+
+.oih-werkzeugband {
+  --rb-flaeche: var(--werkzeugband-flaeche, hsl(var(--muted)));
+  --rb-paneel: var(--werkzeugband-paneel, hsl(var(--background)));
+  --rb-text: var(--werkzeugband-text, hsl(var(--foreground)));
+  --rb-gedaempft: var(--werkzeugband-gedaempft, hsl(var(--muted-foreground)));
+  --rb-akzent: var(--werkzeugband-akzent, rgb(var(--oih-blau-600)));
+  --rb-weich: var(--werkzeugband-weich, rgb(var(--oih-blau-50)));
+  --rb-linie: var(--werkzeugband-linie, hsl(var(--border)));
+  --rb-schatten: var(--werkzeugband-schatten, 0 2px 10px rgb(15 23 42 / 0.12));
+}
+
+.dark .oih-werkzeugband {
+  --rb-flaeche: var(--werkzeugband-flaeche, hsl(var(--background)));
+  --rb-paneel: var(--werkzeugband-paneel, hsl(var(--muted)));
+  --rb-akzent: var(--werkzeugband-akzent, rgb(var(--oih-blau-400)));
+  --rb-weich: var(--werkzeugband-weich, rgb(var(--oih-blau-900) / 0.55));
+  --rb-linie: var(--werkzeugband-linie, rgb(71 85 105));
+  --rb-schatten: var(--werkzeugband-schatten, 0 2px 12px rgb(0 0 0 / 0.45));
+}
+
+/* Klassisch scrollt das Band bei Platznot waagerecht in seinem eigenen
+ * Behälter, die Seite selbst nie. Unter 1024 px entfallen die Gruppennamen,
+ * damit das Band flach bleibt. */
+.oih-werkzeugband .werkzeugband-band {
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 1023px) {
+  .oih-werkzeugband .werkzeugband-gruppenname {
+    display: none;
+  }
+}
+
+/* Die Reiter scrollen in der einzeiligen Darstellung, statt umzubrechen. */
+.oih-werkzeugband .werkzeugband-reiterliste {
+  scrollbar-width: none;
+}
+.oih-werkzeugband .werkzeugband-reiterliste::-webkit-scrollbar {
+  display: none;
+}
+
+/* Sichtbarer Fokus; ein Aufrufer mit eigener Regel (OpenIntraPDF) gewinnt. */
+:where(.oih-werkzeugband) :focus-visible {
+  outline: 2px solid var(--rb-akzent);
+  outline-offset: 1px;
+}

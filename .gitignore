@@ -1,0 +1,7 @@
+# Gebautes
+build/
+frontend/dist/*
+!frontend/dist/.gitkeep
+oberflaeche/node_modules/
+*.app
+.DS_Store

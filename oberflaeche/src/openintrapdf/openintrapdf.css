@@ -1,0 +1,253 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * Farbtokens des PDF-Arbeitsplatzes (Konzept Kap. 02, Gestaltungsgrundlage).
+ *
+ * Alles hängt an der Wurzel `.openintrapdf`, nichts an :root — der
+ * Arbeitsplatz liegt als Fenster über OIH und soll dessen Farben nicht
+ * verändern. Hell/Dunkel schaltet `data-theme` auf der Wurzel.
+ *
+ * Das Papier bleibt in beiden Fällen weiß: pdf.js malt den Seitengrund
+ * selbst, und daran wird hier nichts gedreht.
+ */
+
+.openintrapdf {
+  --opdf-app: #f4f6f8;        /* Programmfläche */
+  --opdf-paneel: #ffffff;     /* Paneele */
+  --opdf-lese: #e3e8ee;       /* Lesefläche */
+  --opdf-text: #172536;       /* Text */
+  --opdf-akzent: #225fc4;     /* Auswahl / Aktion */
+  --opdf-linie: #d2dae4;      /* Trennlinie */
+  --opdf-gedaempft: #5b6b7d;  /* Metadaten, 4.9:1 auf der Programmfläche */
+  --opdf-weich: #eaf1fc;      /* Hover, gewählte Einträge */
+  --opdf-auf-akzent: #ffffff; /* Schrift auf Akzentfläche */
+  --opdf-warn-hg: #fff4d6;
+  --opdf-warn-text: #6b4500;
+  --opdf-fehler: #b42318;
+  --opdf-fehler-hg: #fdecea;
+  --opdf-erfolg: #1f6b50;
+  --opdf-schatten: 0 2px 10px rgba(20, 40, 59, 0.16);
+  --opdf-dunkel-papier: #15191f; /* Seitengrund bei „Dunkles Dokument“, in beiden Themen gleich */
+  /* Das gemeinsame Werkzeugband (components/shared/werkzeugband/werkzeugband.css) malt mit
+   * --werkzeugband-*; hier zeigen sie auf die eigenen Tokens, also folgt es der
+   * Hell/Dunkel-Wahl des Arbeitsplatzes. */
+  --werkzeugband-flaeche: var(--opdf-app);
+  --werkzeugband-paneel: var(--opdf-paneel);
+  --werkzeugband-text: var(--opdf-text);
+  --werkzeugband-gedaempft: var(--opdf-gedaempft);
+  --werkzeugband-akzent: var(--opdf-akzent);
+  --werkzeugband-weich: var(--opdf-weich);
+  --werkzeugband-linie: var(--opdf-linie);
+  --werkzeugband-schatten: var(--opdf-schatten);
+  color-scheme: light;
+  background: var(--opdf-app);
+  color: var(--opdf-text);
+}
+
+.openintrapdf[data-theme='dark'] {
+  --opdf-app: #171c24;
+  --opdf-paneel: #202733;
+  --opdf-lese: #11161d;
+  --opdf-text: #e4eaf1;
+  --opdf-akzent: #8cb6ff;
+  --opdf-linie: #3a4658;
+  --opdf-gedaempft: #b0bdce;
+  --opdf-weich: #293951;
+  --opdf-auf-akzent: #10213f;
+  --opdf-warn-hg: #3d3217;
+  --opdf-warn-text: #f5d48a;
+  --opdf-fehler: #ff9c8f;
+  --opdf-fehler-hg: #3f1f1c;
+  --opdf-erfolg: #8cd8bd;
+  --opdf-schatten: 0 2px 12px rgba(0, 0, 0, 0.45);
+  --opdf-dunkel-papier: #15191f;
+  color-scheme: dark;
+}
+
+/* Sichtbarer Fokus überall, auch auf Elementen, die pdf.js erzeugt. */
+.openintrapdf :focus-visible {
+  outline: 3px solid var(--opdf-akzent);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------
+ * Leseansicht (pdf.js PDFViewer)
+ * ------------------------------------------------------------------ */
+
+.openintrapdf .opdf-lesecontainer {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  background: var(--opdf-lese);
+}
+
+/* pdf.js rechnet bei „Seitenbreite“ mit eigenem Abstand zum Rand, solange
+ * `removePageBorders` aus ist. Seinen durchsichtigen 9-px-Rahmen ersetzen
+ * wir über seine eigenen Variablen durch Abstand + Schatten. */
+.openintrapdf .pdfViewer {
+  --page-border: 0 solid transparent;
+  --page-margin: 16px auto 0;
+  padding-bottom: 24px;
+}
+
+.openintrapdf .pdfViewer .page {
+  box-shadow: var(--opdf-schatten);
+}
+
+/* Suchtreffer im Akzent statt im Standardblau von pdf.js. */
+.openintrapdf .textLayer .highlight.selected {
+  background-color: rgba(34, 95, 196, 0.45);
+}
+
+/* Links in der Anmerkungsebene sichtbar machen, wenn man darüberfährt. */
+.openintrapdf .annotationLayer .linkAnnotation > a:hover {
+  background: rgba(34, 95, 196, 0.12);
+  box-shadow: 0 0 0 1px rgba(34, 95, 196, 0.35);
+}
+
+/* Kurzes Aufleuchten der Stelle, zu der eine Kommentarzeile springt. */
+.openintrapdf .opdf-stelle {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid var(--opdf-akzent);
+  border-radius: 3px;
+  animation: opdf-aufleuchten 1.6s ease-out forwards;
+}
+
+@keyframes opdf-aufleuchten {
+  0% { opacity: 1; box-shadow: 0 0 0 6px rgba(34, 95, 196, 0.25); }
+  100% { opacity: 0; box-shadow: 0 0 0 0 rgba(34, 95, 196, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .openintrapdf .opdf-stelle { animation: none; opacity: 0.8; }
+}
+
+/* ------------------------------------------------------------------
+ * Anmerkungsebene (Entwurf) — Geschwister von .pdfViewer im Scrollcontainer,
+ * nie im Seiten-Div (das leert pdf.js beim Zoomen).
+ * ------------------------------------------------------------------ */
+
+.openintrapdf .opdf-anmerkungen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.openintrapdf .opdf-anmerkungen-seite {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Fängt die Zeiger nur, solange ein Zeichenwerkzeug aktiv ist; bei den
+ * Textmarkierungen bleibt die Textebene von pdf.js frei für die Auswahl. */
+.openintrapdf .opdf-zeichenflaeche {
+  position: absolute;
+  pointer-events: auto;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.openintrapdf .opdf-anmerkungen[data-werkzeug='note'] .opdf-zeichenflaeche,
+.openintrapdf .opdf-anmerkungen[data-werkzeug='sticky'] .opdf-zeichenflaeche,
+.openintrapdf .opdf-anmerkungen[data-werkzeug='stamp'] .opdf-zeichenflaeche {
+  cursor: copy;
+}
+
+/* Griffe an Post-it und Stempel des Entwurfs (Etappe 5): die Fläche zieht,
+ * die Ecke unten rechts ändert die Größe. Sie liegen als HTML über dem SVG
+ * und fangen die Zeiger nur, solange kein Zeichenwerkzeug die Fläche hält. */
+.openintrapdf .opdf-griff {
+  position: absolute;
+  pointer-events: auto;
+  cursor: move;
+  touch-action: none;
+  box-sizing: border-box;
+  border: 1px dashed transparent;
+  border-radius: 2px;
+}
+
+.openintrapdf .opdf-griff:hover {
+  border-color: var(--opdf-akzent);
+}
+
+.openintrapdf .opdf-griff-ecke {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  background: var(--opdf-paneel);
+  border: 2px solid var(--opdf-akzent);
+  border-radius: 3px;
+  opacity: 0;
+}
+
+.openintrapdf .opdf-griff:hover .opdf-griff-ecke,
+.openintrapdf .opdf-griff-ecke:hover {
+  opacity: 1;
+}
+
+/* Klickziele der Links (Etappe 9): nur mit dem Link-Werkzeug, über der
+ * Zeichenfläche; ein Klick öffnet das Löschen. */
+.openintrapdf .opdf-link-griff {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  box-sizing: border-box;
+  border: 1px dashed transparent;
+}
+
+.openintrapdf .opdf-link-griff:hover {
+  border-color: var(--opdf-akzent);
+  background: rgba(34, 95, 196, 0.1);
+}
+
+/* ------------------------------------------------------------------
+ * Hand-Werkzeug (Etappe 7): Ziehen verschiebt den Ausschnitt; die Textebene
+ * von pdf.js gibt dabei weder Auswahl noch Textzeiger her.
+ * ------------------------------------------------------------------ */
+
+.openintrapdf .opdf-lesecontainer[data-zeiger='hand'] {
+  cursor: grab;
+}
+
+.openintrapdf .opdf-lesecontainer[data-zeiger='hand'] .textLayer {
+  user-select: none;
+}
+
+.openintrapdf .opdf-lesecontainer[data-zeiger='hand'] .textLayer :is(span, br) {
+  cursor: grab;
+}
+
+.openintrapdf .opdf-lesecontainer.opdf-hand-zieht,
+.openintrapdf .opdf-lesecontainer.opdf-hand-zieht .textLayer :is(span, br) {
+  cursor: grabbing;
+}
+
+/* Rechte der PDF verbieten das Kopieren (Etappe 9): keine Textauswahl,
+ * solange das Rechte-Kennwort fehlt. */
+.openintrapdf .opdf-lesecontainer[data-kopieren='gesperrt'] .textLayer {
+  user-select: none;
+}
+
+/* ------------------------------------------------------------------
+ * Dunkles Dokument (Etappe 7): Nur das Seitenbild wird umgekehrt — der
+ * Filter liegt auf dem Canvas von pdf.js. Anmerkungsebene, Textauswahl und
+ * Entwurf sind Geschwister und behalten ihre Farben; Miniaturen in der
+ * Seitenleiste bleiben normal. Unabhängig vom Thema der Oberfläche.
+ * ------------------------------------------------------------------ */
+
+.openintrapdf .opdf-lesecontainer[data-dunkel='true'] .pdfViewer .page {
+  background-color: var(--opdf-dunkel-papier);
+}
+
+.openintrapdf .opdf-lesecontainer[data-dunkel='true'] .pdfViewer .page .canvasWrapper {
+  filter: invert(0.9) hue-rotate(180deg);
+}

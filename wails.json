@@ -1,0 +1,22 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "OpenIntraPDF",
+  "outputfilename": "OpenIntraPDF",
+  "frontend:dir": "oberflaeche",
+  "frontend:install": "",
+  "frontend:build": "npx vite build --config vite.desktop.config.ts",
+  "frontend:dev:watcher": "",
+  "frontend:dev:serverUrl": "auto",
+  "wailsjsdir": "./frontend",
+  "author": {
+    "name": "Jan Günther",
+    "email": "jg@linxpress.de"
+  },
+  "info": {
+    "companyName": "Jan Günther",
+    "productName": "OpenIntraPDF",
+    "productVersion": "0.9.3",
+    "copyright": "© 2026 Jan Günther · Apache-2.0",
+    "comments": "PDF lesen, Seiten ordnen, kommentieren, Text erkennen, exportieren, binden."
+  }
+}

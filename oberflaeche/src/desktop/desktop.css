@@ -1,0 +1,417 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * OpenIntraPDF auf dem Schreibtisch: Tailwind fuer den Arbeitsplatz (seine
+ * Klassen) und der Startbildschirm. Hell/Dunkel folgt macOS ueber
+ * prefers-color-scheme; der Arbeitsplatz selbst bringt seine eigene Wahl
+ * (Hell/Dunkel/System, thema.ts) mit.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --desk-hg: #f4f6f8;
+  --desk-paneel: #ffffff;
+  --desk-text: #172536;
+  --desk-gedaempft: #5b6b7d;
+  --desk-linie: #d2dae4;
+  --desk-akzent: #225fc4;
+  --desk-auf-akzent: #ffffff;
+  --desk-weich: #eaf1fc;
+  --desk-fehler: #b42318;
+  --desk-fehler-hg: #fdecea;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --desk-hg: #171c24;
+    --desk-paneel: #202733;
+    --desk-text: #e4eaf1;
+    --desk-gedaempft: #b0bdce;
+    --desk-linie: #3a4658;
+    --desk-akzent: #8cb6ff;
+    --desk-auf-akzent: #10213f;
+    --desk-weich: #293951;
+    --desk-fehler: #ff9c8f;
+    --desk-fehler-hg: #3f1f1c;
+    color-scheme: dark;
+  }
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--desk-hg);
+  color: var(--desk-text);
+  font-family: Helvetica, Arial, "Liberation Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  /* Kein Text-Cursor und keine Auswahl ausserhalb von Eingabefeldern und dem Dokument. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.desktop-wurzel {
+  height: 100%;
+  /* Wails: Abgelegte Dateien landen nur auf Elementen mit dieser Eigenschaft. */
+  --wails-drop-target: drop;
+}
+
+.desktop-wurzel .openintrapdf {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Startbildschirm */
+.start {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: auto;
+}
+
+.start-mitte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 48px 24px 24px;
+}
+
+.start-logo {
+  width: min(520px, 80vw);
+  height: auto;
+}
+
+.start-logo-dunkel { display: none; }
+@media (prefers-color-scheme: dark) {
+  .start-logo-hell { display: none; }
+  .start-logo-dunkel { display: block; }
+}
+
+.start-knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--desk-akzent);
+  color: var(--desk-auf-akzent);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: default;
+}
+.start-knopf:hover { filter: brightness(1.08); }
+.start-knopf:disabled { opacity: 0.5; }
+
+.start-ziehen {
+  font-size: 13px;
+  color: var(--desk-gedaempft);
+}
+
+.start-ziehen-aktiv .start-mitte {
+  outline: 3px dashed var(--desk-akzent);
+  outline-offset: -16px;
+  border-radius: 24px;
+}
+
+.start-zuletzt {
+  width: min(640px, 92vw);
+  margin: 0 auto;
+  padding: 0 24px 32px;
+}
+
+.start-zuletzt h2 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--desk-gedaempft);
+}
+
+.start-zuletzt ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--desk-linie);
+  border-radius: 10px;
+  background: var(--desk-paneel);
+  overflow: hidden;
+}
+
+.start-zuletzt li + li { border-top: 1px solid var(--desk-linie); }
+
+.start-eintrag {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+.start-eintrag:hover:not(:disabled) { background: var(--desk-weich); }
+.start-eintrag:disabled { opacity: 0.5; }
+.start-eintrag strong { font-weight: 600; }
+.start-eintrag span {
+  display: block;
+  font-size: 12px;
+  color: var(--desk-gedaempft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.start-eintrag em {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--desk-fehler);
+  align-self: center;
+}
+
+.start-leer {
+  padding: 14px;
+  border: 1px dashed var(--desk-linie);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--desk-gedaempft);
+}
+
+.start-fuss {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--desk-linie);
+  font-size: 12px;
+  color: var(--desk-gedaempft);
+}
+
+.start-fehler {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--desk-fehler-hg);
+  color: var(--desk-fehler);
+  font-size: 13px;
+}
+
+/* Lizenzen (Hilfe → Lizenzen, LizenzenDialog.tsx) */
+.lizenzen-schleier {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 0.45);
+}
+
+.lizenzen {
+  width: min(760px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--desk-paneel);
+  color: var(--desk-text);
+  border: 1px solid var(--desk-linie);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.lizenzen-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--desk-linie);
+}
+
+.lizenzen-kopf h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.lizenzen-zu {
+  display: inline-flex;
+  padding: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--desk-gedaempft);
+  cursor: pointer;
+}
+
+.lizenzen-zu:hover {
+  background: var(--desk-weich);
+  color: var(--desk-text);
+}
+
+.lizenzen-inhalt {
+  overflow: auto;
+  padding: 14px 18px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lizenzen-laedt {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+  color: var(--desk-gedaempft);
+}
+
+.lizenzen-app p {
+  margin: 0 0 4px;
+}
+
+.lizenzen-app-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.lizenzen-teile-titel {
+  margin: 18px 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lizenzen-zahl {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--desk-weich);
+  color: var(--desk-gedaempft);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.lizenzen-hinweis {
+  margin: 0 0 10px;
+  color: var(--desk-gedaempft);
+}
+
+.lizenzen-suche {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--desk-linie);
+  border-radius: 8px;
+  color: var(--desk-gedaempft);
+}
+
+.lizenzen-suche input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--desk-text);
+  font: inherit;
+}
+
+.lizenzen-gruppe h4 {
+  margin: 14px 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--desk-gedaempft);
+}
+
+.lizenzen-zeile {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lizenzen-zeile:hover {
+  background: var(--desk-weich);
+}
+
+.lizenzen-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lizenzen-fassung {
+  color: var(--desk-gedaempft);
+  font-size: 12px;
+}
+
+.lizenzen-marke {
+  margin-left: auto;
+  padding: 1px 7px;
+  border: 1px solid var(--desk-linie);
+  border-radius: 999px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.lizenzen-text {
+  max-height: 280px;
+  overflow: auto;
+  margin: 4px 0 8px 24px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--desk-hg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Über OpenIntraPDF (Linux, Windows; UeberDialog.tsx) */
+.ueber {
+  width: min(520px, 100%);
+}
+
+.ueber-inhalt {
+  text-align: center;
+}
+
+.ueber-inhalt p {
+  margin: 0 0 8px;
+}
+
+.start-logo.ueber-logo {
+  width: min(300px, 70%);
+  margin: 4px auto 14px;
+}
+
+.ueber-knoepfe {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}

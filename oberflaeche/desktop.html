@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Content-Security-Policy (#253): Die App hat kein Netz und braucht keins.
+         Alles kommt vom Asset-Server der App ('self' = wails://wails, unter
+         Windows http://wails.localhost). Was ueber 'self' hinausgeht:
+           style-src 'unsafe-inline'  Die Stilvorlage des pdf.js-Viewers
+                              (pdfjsLaden.ts) und die Regeln der Leseansicht kommen
+                              als <style>-Element. Nur Stil, kein Skript.
+           img-src data:      Miniaturen (Leinwand als data:-PNG), Notizsymbol und
+                              die Symbole aus pdf_viewer.css.
+           worker-src blob:   pdf.js startet seinen Worker ueber eine blob:-Huelle,
+                              wenn es Seite und Worker nicht fuer gleichen Ursprung
+                              haelt. Im WKWebView (macOS) ist der Ursprung
+                              wails://wails, der Worker kommt direkt (geprueft
+                              03.10.2026); WebKitGTK unter Linux ist nicht geprueft.
+                              Ohne blob: fiele pdf.js dort auf den Worker im
+                              Hauptfaden zurueck -- es ginge, nur langsamer.
+           media-src blob:    eingebettete Audio-/Videoanmerkungen (pdf.js spielt
+                              sie aus einer blob:-Adresse ab).
+         Kein 'unsafe-eval' und kein 'unsafe-inline' fuer Skripte: pdf.js 6 kommt
+         ohne eval aus (die Option isEvalSupported gibt es dort nicht mehr), und
+         Wails haengt seine Laufzeit als Dateien /wails/*.js ein. Pruefung:
+         src/desktop/csp.test.ts. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; worker-src 'self' blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- OpenIntraPDF fuer den Schreibtisch (Vertrag Etappe 6): eigener Einstieg im
+         OpenIntraHub-Frontend, gebaut mit vite.desktop.config.ts nach
+         clients/openintrapdf-desktop/frontend/dist. Keine maschinelle Uebersetzung,
+         wie in index.html. -->
+    <meta name="google" content="notranslate" />
+    <title>OpenIntraPDF</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/desktop/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: OpenIntraPDF
+Upstream-Contact: Jan Günther <jg@linxpress.de>
+Source: https://openintrahub.org
+
+Files: *
+Copyright: 2026 Jan Günther
+License: Apache-2.0
+ Siehe /usr/share/common-licenses/Apache-2.0 und
+ /usr/share/openintrapdf/LICENSE. Die Lizenzen aller eingebauten Teile
+ (Go-Module, JavaScript-Pakete, Schrift) liegen mit vollem Text unter
+ /usr/share/openintrapdf/lizenzen/ und stehen in der App unter
+ Hilfe → Lizenzen.

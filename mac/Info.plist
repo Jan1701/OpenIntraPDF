@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- SPDX-License-Identifier: Apache-2.0
+     OpenIntraPDF fuer den Mac (Vertrag Etappe 6). Wails fuellt die Platzhalter
+     aus wails.json. Die Dateizuordnung .pdf ("Oeffnen mit") steht hier;
+     das Oeffnen-Ereignis nimmt mac.Options.OnFileOpen entgegen. -->
+<plist version="1.0"><dict>
+	<key>CFBundlePackageType</key><string>APPL</string>
+	<key>CFBundleName</key><string>OpenIntraPDF</string>
+	<key>CFBundleDisplayName</key><string>OpenIntraPDF</string>
+	<key>CFBundleExecutable</key><string>{{.OutputFilename}}</string>
+	<key>CFBundleIdentifier</key><string>org.openintrahub.openintrapdf</string>
+	<key>CFBundleVersion</key><string>{{.Info.ProductVersion}}</string>
+	<key>CFBundleShortVersionString</key><string>{{.Info.ProductVersion}}</string>
+	<key>CFBundleGetInfoString</key><string>{{.Info.Comments}}</string>
+	<key>CFBundleIconFile</key><string>iconfile</string>
+	<key>LSMinimumSystemVersion</key><string>12.0.0</string>
+	<key>NSHighResolutionCapable</key><string>true</string>
+	<!-- Sprachen der App (06.10.2026): Ohne diese Liste waehlt macOS fuer
+	     seine eigenen Teile (Oeffnen-Fenster, Druckdialog, „Emoji & Symbole“,
+	     Knoepfe im Info-Fenster) Englisch statt der Systemsprache. -->
+	<key>CFBundleDevelopmentRegion</key><string>de</string>
+	<key>CFBundleAllowMixedLocalizations</key><true/>
+	<key>CFBundleLocalizations</key>
+	<array><string>bg</string><string>cs</string><string>da</string><string>de</string><string>el</string><string>en</string><string>es</string><string>et</string><string>fi</string><string>fr</string><string>ga</string><string>hr</string><string>hu</string><string>it</string><string>ja</string><string>lt</string><string>lv</string><string>mt</string><string>nl</string><string>pl</string><string>pt</string><string>ro</string><string>sk</string><string>sl</string><string>sv</string><string>uk</string></array>
+	<key>NSHumanReadableCopyright</key><string>{{.Info.Copyright}}</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key><true/>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key><string>PDF-Dokument</string>
+			<key>CFBundleTypeRole</key><string>Editor</string>
+			<key>LSHandlerRank</key><string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.adobe.pdf</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>pdf</string>
+			</array>
+			<key>CFBundleTypeIconFile</key><string>iconfile</string>
+		</dict>
+	</array>
+</dict></plist>

@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# OpenIntraPDF fuer Linux als .deb, .rpm und Arch-Paket (nfpm, 06.10.2026).
+# Ein Programm (gebaut auf Debian 13), drei Paketformate; nur die Namen der
+# Abhaengigkeiten unterscheiden sich je Distribution. Aufruf in
+# bauen-im-container.sh, das @BAU@ und @HASH@ einsetzt (nfpm ersetzt
+# Umgebungsvariablen nicht in jedem Feld, version_metadata blieb woertlich). Die
+# Pfade sind die im Container (nfpm setzt in src keine Variablen ein):
+# /tmp/openintrapdf (gebaut), /lizenzen und /symbol (eingehaengt).
+#
+# Tesseract kommt aus der Distribution (nicht mitgeliefert wie beim Mac);
+# das Programm ruft /usr/bin/tesseract, das seine eigenen Sprachdaten kennt.
+
+name: openintrapdf
+arch: amd64
+platform: linux
+version: 0.9.3
+prerelease: beta.@BAU@
+version_metadata: @HASH@
+release: "1"
+section: graphics
+priority: optional
+maintainer: Jan Günther <jg@linxpress.de>
+vendor: Jan Günther
+homepage: https://openintrahub.org
+license: Apache-2.0
+description: |-
+  PDF lesen, ordnen, kommentieren, Text erkennen
+  PDF lesen, Seiten ordnen, kommentieren, Text erkennen (Tesseract),
+  exportieren und binden -- die Desktop-Fassung des PDF-Werkzeugs aus
+  OpenIntraHub, ohne Server und ohne Netz.
+
+contents:
+  - src: /tmp/openintrapdf
+    dst: /usr/bin/openintrapdf
+    file_info: { mode: 0755 }
+  - src: linux/openintrapdf.desktop
+    dst: /usr/share/applications/openintrapdf.desktop
+  - src: /symbol/openintrapdf.svg
+    dst: /usr/share/icons/hicolor/scalable/apps/openintrapdf.svg
+  # Hilfe → Lizenzen liest diese Dateien (lizenzen.go, ressourcenOrdner).
+  - src: LICENSE
+    dst: /usr/share/openintrapdf/LICENSE
+  - src: /lizenzen
+    dst: /usr/share/openintrapdf/lizenzen
+    type: tree
+  # Lizenz an der Stelle, die jede Distribution erwartet
+  - src: linux/copyright
+    dst: /usr/share/doc/openintrapdf/copyright
+    packager: deb
+  - src: LICENSE
+    dst: /usr/share/licenses/openintrapdf/LICENSE
+    packager: rpm
+  - src: LICENSE
+    dst: /usr/share/licenses/openintrapdf/LICENSE
+    packager: archlinux
+
+scripts:
+  postinstall: linux/nach-installation.sh
+  postremove: linux/nach-entfernen.sh
+
+overrides:
+  # Debian 13, Ubuntu 24.04 (t64) und aelter
+  deb:
+    depends:
+      - libgtk-3-0t64 | libgtk-3-0
+      - libwebkit2gtk-4.1-0
+      - tesseract-ocr
+      - tesseract-ocr-deu
+      - tesseract-ocr-eng
+    recommends:
+      - okular
+  # Fedora
+  rpm:
+    depends:
+      - gtk3
+      - webkit2gtk4.1
+      - tesseract
+      - tesseract-langpack-deu
+      - tesseract-langpack-eng
+    recommends:
+      - okular
+  archlinux:
+    depends:
+      - gtk3
+      - webkit2gtk-4.1
+      - tesseract
+      - tesseract-data-deu
+      - tesseract-data-eng
+    suggests:
+      - okular
+
+archlinux:
+  packager: Jan Günther <jg@linxpress.de>
+rpm:
+  group: Applications/Productivity
+  summary: PDF lesen, ordnen, kommentieren, Text erkennen
