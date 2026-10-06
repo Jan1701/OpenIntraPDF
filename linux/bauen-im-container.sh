@@ -29,7 +29,7 @@ if ldd /tmp/openintrapdf | grep -q "not found"; then ldd /tmp/openintrapdf | gre
 echo "glibc: $(objdump -T /tmp/openintrapdf | grep -o 'GLIBC_[0-9.]*' | sort -V | tail -1)"
 
 GOBIN=/tmp/werkzeug go install github.com/goreleaser/nfpm/v2/cmd/nfpm@$NFPM
-sed -e "s/@BAU@/$BAU/" -e "s/@HASH@/$HASH/" linux/nfpm.yaml > /tmp/nfpm.yaml
+sed -e "s/@BAU@/$BAU/" linux/nfpm.yaml > /tmp/nfpm.yaml
 for format in deb rpm archlinux; do
     /tmp/werkzeug/nfpm package -f /tmp/nfpm.yaml -p "$format" -t /ausgabe/ >/dev/null
 done

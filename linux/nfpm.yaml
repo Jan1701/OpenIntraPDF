@@ -3,8 +3,8 @@
 # OpenIntraPDF fuer Linux als .deb, .rpm und Arch-Paket (nfpm, 06.10.2026).
 # Ein Programm (gebaut auf Debian 13), drei Paketformate; nur die Namen der
 # Abhaengigkeiten unterscheiden sich je Distribution. Aufruf in
-# bauen-im-container.sh, das @BAU@ und @HASH@ einsetzt (nfpm ersetzt
-# Umgebungsvariablen nicht in jedem Feld, version_metadata blieb woertlich). Die
+# bauen-im-container.sh, das @BAU@ einsetzt (nfpm ersetzt Umgebungs-
+# variablen nicht in jedem Feld). Die
 # Pfade sind die im Container (nfpm setzt in src keine Variablen ein):
 # /tmp/openintrapdf (gebaut), /lizenzen und /symbol (eingehaengt).
 #
@@ -15,9 +15,10 @@ name: openintrapdf
 arch: amd64
 platform: linux
 version: 0.9.3
-prerelease: beta.@BAU@
-version_metadata: @HASH@
-release: "1"
+# Die Baunummer ist die Paket-Revision (0.9.3-2342): Jeder Bau ist fuer
+# apt, dnf und pacman eine Aktualisierung. Kein „beta“ mehr (Jan,
+# 06.10.2026: „nimm beta raus, die desktopapp ist ja fertig“).
+release: "@BAU@"
 section: graphics
 priority: optional
 maintainer: Jan Günther <jg@linxpress.de>

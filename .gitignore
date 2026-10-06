@@ -5,3 +5,5 @@ frontend/dist/*
 oberflaeche/node_modules/
 *.app
 .DS_Store
+# Von „wails build“ erzeugte Bindungen; die Bruecke (oberflaeche/src/desktop/bruecke.ts) ist von Hand getippt
+frontend/wailsjs/
