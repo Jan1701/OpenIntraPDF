@@ -10,7 +10,10 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE">Apache-2.0</a> · Windows (MSI) · macOS · Linux (deb, rpm, Arch)
+  <a href="https://github.com/Jan1701/OpenIntraPDF/releases/latest"><b>Herunterladen</b></a> ·
+  <a href="https://github.com/Jan1701/OpenIntraPDF/releases">Alle Versionen</a> ·
+  <a href="LICENSE">Apache-2.0</a> ·
+  Windows (MSI) · macOS · Linux (deb, rpm, Arch)
 </p>
 
 ---
@@ -18,8 +21,8 @@
 OpenIntraPDF ist die Desktop-Fassung des PDF-Arbeitsplatzes aus
 [OpenIntraHub](https://openintrahub.org), einem Intranet für Unternehmen. Dort
 bearbeitet man PDFs direkt im Drive; hier dieselbe Oberfläche als eigenständige
-App für Windows, Mac und Linux. Die Dateien bleiben auf dem Rechner, die Texterkennung
-läuft lokal.
+App für Windows, Mac und Linux. Die Dateien bleiben auf dem Rechner, die
+Texterkennung läuft lokal.
 
 ## Was die App kann
 
@@ -38,21 +41,25 @@ erscheinen in der Sprache des Systems; 26 Sprachen sind enthalten.
 
 ## Installieren
 
-Fertige Pakete stehen unter [Releases](../../releases/latest). Die Dateinamen
-tragen keine Versionsnummer, damit Freigaben in Virenschutz und Softwareverteilung
-nicht bei jeder neuen Version erneuert werden müssen; die Version steht in der App
-unter **Über OpenIntraPDF**.
+Die fertigen Pakete hängen an der **[neuesten Version](https://github.com/Jan1701/OpenIntraPDF/releases/latest)**; ältere
+Versionen und was sich jeweils geändert hat, stehen unter
+**[Releases](https://github.com/Jan1701/OpenIntraPDF/releases)**. Die Dateinamen tragen keine Versionsnummer, damit
+Freigaben in Virenschutz und Softwareverteilung bei jeder neuen Version gültig
+bleiben – und die Links unten immer auf die neueste Version zeigen. Welche
+Version installiert ist, steht in der App unter **Über OpenIntraPDF**.
 
 | System | Paket | Texterkennung | geprüft mit |
 |---|---|---|---|
-| Windows 10/11 (x64) | `OpenIntraPDF.msi` | mitgeliefert | Windows 11 |
-| macOS (Apple Silicon) | `OpenIntraPDF-macos-arm64.zip` | mitgeliefert | macOS 27 |
-| Debian, Ubuntu, OpenIntraOS | `.deb` | aus der Distribution (`tesseract-ocr`) | Debian 13, Ubuntu 24.04 |
-| Fedora | `.rpm` | aus der Distribution (`tesseract`) | aktuelle Fedora |
-| Arch Linux | `.pkg.tar.zst` | aus der Distribution (`tesseract`) | aktueller Stand |
+| Windows 10/11 (x64) | [`OpenIntraPDF.msi`](https://github.com/Jan1701/OpenIntraPDF/releases/latest/download/OpenIntraPDF.msi) | mitgeliefert | Windows 11 |
+| macOS (Apple Silicon) | [`OpenIntraPDF-macos-arm64.zip`](https://github.com/Jan1701/OpenIntraPDF/releases/latest/download/OpenIntraPDF-macos-arm64.zip) | mitgeliefert | macOS 27 |
+| Debian, Ubuntu, OpenIntraOS | [`openintrapdf_amd64.deb`](https://github.com/Jan1701/OpenIntraPDF/releases/latest/download/openintrapdf_amd64.deb) | aus der Distribution (`tesseract-ocr`) | Debian 13, Ubuntu 24.04 |
+| Fedora | [`openintrapdf.x86_64.rpm`](https://github.com/Jan1701/OpenIntraPDF/releases/latest/download/openintrapdf.x86_64.rpm) | aus der Distribution (`tesseract`) | aktuelle Fedora |
+| Arch Linux | [`openintrapdf-x86_64.pkg.tar.zst`](https://github.com/Jan1701/OpenIntraPDF/releases/latest/download/openintrapdf-x86_64.pkg.tar.zst) | aus der Distribution (`tesseract`) | aktueller Stand |
 
-Das Linux-Programm braucht glibc 2.34 oder neuer und WebKitGTK 4.1. Gedruckt
-wird über den Druckdialog von KDE (Okular, empfohlen).
+Die Prüfsummen aller Pakete stehen in
+[`SHA256SUMS`](https://github.com/Jan1701/OpenIntraPDF/releases/latest/download/SHA256SUMS):
+`sha256sum -c SHA256SUMS --ignore-missing` (Linux) bzw.
+`shasum -a 256 -c SHA256SUMS --ignore-missing` (macOS).
 
 **Windows:** Das MSI installiert für alle Benutzer nach
 `C:\Program Files\OpenIntraPDF` und trägt die App unter „Öffnen mit“ und den
@@ -65,8 +72,23 @@ Verteilung im Netzwerk, etwa als Startskript einer Gruppenrichtlinie:
 msiexec /i \\server\freigabe\OpenIntraPDF.msi /qn /norestart
 ```
 
-Die App ist nicht signiert: Windows SmartScreen und macOS Gatekeeper fragen
-beim ersten Start nach.
+**macOS:** Zip entpacken und `OpenIntraPDF.app` nach „Programme“ ziehen.
+
+**Linux:** Das Paket mit dem Paketwerkzeug der Distribution installieren; es
+holt Tesseract und WebKitGTK selbst dazu:
+
+```sh
+sudo apt install ./openintrapdf_amd64.deb                 # Debian, Ubuntu, OpenIntraOS
+sudo dnf install ./openintrapdf.x86_64.rpm                # Fedora
+sudo pacman -U openintrapdf-x86_64.pkg.tar.zst            # Arch Linux
+```
+
+Das Linux-Programm braucht glibc 2.34 oder neuer und WebKitGTK 4.1. Gedruckt
+wird über den Druckdialog von KDE (Okular, empfohlen).
+
+Die App ist nicht signiert: Beim ersten Start fragt Windows SmartScreen nach
+(„Weitere Informationen“ → „Trotzdem ausführen“), macOS Gatekeeper ebenso
+(Systemeinstellungen → Datenschutz & Sicherheit → „Dennoch öffnen“).
 
 ## Selbst bauen
 
@@ -119,6 +141,12 @@ OPENINTRAPDF_BAUSERVER=root@mein-docker-host ./bauen-windows.sh   # → build/wi
 go test ./... && (cd oberflaeche && npm test)
 ```
 
+## Fehler und Wünsche
+
+Fehler und Vorschläge bitte als [Issue](https://github.com/Jan1701/OpenIntraPDF/issues)
+melden – am besten mit Version (Über OpenIntraPDF), System und, wenn möglich,
+einer Beispieldatei ohne vertrauliche Inhalte.
+
 ## Lizenz
 
 OpenIntraPDF © 2026 Jan Günther, veröffentlicht unter der
@@ -144,8 +172,13 @@ OpenIntraPDF is a desktop PDF tool: read, reorder pages, annotate, recognize
 text (OCR), export to DOCX/ODT/XLSX/CSV, merge, protect and print – locally,
 without a server or account, on Windows, macOS and Linux. It is the desktop
 edition of the PDF workspace in [OpenIntraHub](https://openintrahub.org). The
-interface follows the system language (26 languages). Ready-made packages
-(Windows MSI, macOS, deb, rpm, Arch) are attached to the
-[latest release](../../releases/latest); their file names carry no version
-number, so antivirus and deployment exclusions stay valid across updates. Licensed under Apache-2.0, © 2026 Jan Günther;
-third-party licenses are listed in the app under *Help → Licenses*.
+interface follows the system language (26 languages).
+
+**Download:** ready-made packages (Windows MSI, macOS, deb, rpm, Arch) are
+attached to the [latest release](https://github.com/Jan1701/OpenIntraPDF/releases/latest); all versions and their changes
+are listed under [Releases](https://github.com/Jan1701/OpenIntraPDF/releases). File names carry no version number, so
+antivirus and deployment exclusions stay valid across updates. Bugs and
+suggestions: [Issues](https://github.com/Jan1701/OpenIntraPDF/issues).
+
+Licensed under Apache-2.0, © 2026 Jan Günther; third-party licenses are listed
+in the app under *Help → Licenses*.
