@@ -42,6 +42,8 @@ export interface StartInfo {
     fassung?: string;
     bau?: string;
     urheber?: string;
+    /** darwin, linux, windows (goruntime.GOOS); Windows druckt über die Webansicht. */
+    system?: string;
 }
 
 /** Ein mitgeliefertes Teil im Lizenzdialog (lizenzen.go). */
@@ -74,6 +76,8 @@ export interface Bruecke {
     ZuletztOeffnen(schluessel: string): Promise<Geoeffnet>;
     Zuletzt(): Promise<ZuletztEintrag[]>;
     Schliessen(id: string): Promise<void>;
+    /** Holt vor dem Laden den Stand der Platte (nach einem Konflikt: „Neu laden“). */
+    Neuladen(id: string): Promise<void>;
     Info(id: string): Promise<PdfInfo>;
     Speichern(id: string, befehl: CommitBefehl, schluessel: string): Promise<CommitErgebnis>;
     Extrahieren(id: string, befehl: ExtraktBefehl, schluessel: string): Promise<ExtraktErgebnis>;

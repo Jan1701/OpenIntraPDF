@@ -14,8 +14,8 @@
 name: openintrapdf
 arch: amd64
 platform: linux
-version: 0.9.3
-# Die Baunummer ist die Paket-Revision (0.9.3-2342): Jeder Bau ist fuer
+version: 0.9.4
+# Die Baunummer ist die Paket-Revision (0.9.4-2343): Jeder Bau ist fuer
 # apt, dnf und pacman eine Aktualisierung. Kein „beta“ mehr (Jan,
 # 06.10.2026: „nimm beta raus, die desktopapp ist ja fertig“).
 release: "@BAU@"

@@ -4,5 +4,11 @@
 
 package main
 
-// tesseractName ist der Name des mitgelieferten Programms neben der App.
-const tesseractName = "tesseract"
+import "path/filepath"
+
+// tesseractOrte: unter Linux kommt Tesseract aus der Distribution
+// (/usr/bin/tesseract neben /usr/bin/openintrapdf) und kennt seine
+// Sprachdaten selbst.
+func tesseractOrte(ordner string) (programm, tessdata string) {
+	return filepath.Join(ordner, "tesseract"), ""
+}

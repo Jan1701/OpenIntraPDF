@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE">Apache-2.0</a> · macOS · Linux (deb, rpm, Arch) · Windows in Arbeit
+  <a href="LICENSE">Apache-2.0</a> · Windows (MSI) · macOS · Linux (deb, rpm, Arch)
 </p>
 
 ---
@@ -18,7 +18,7 @@
 OpenIntraPDF ist die Desktop-Fassung des PDF-Arbeitsplatzes aus
 [OpenIntraHub](https://openintrahub.org), einem Intranet für Unternehmen. Dort
 bearbeitet man PDFs direkt im Drive; hier dieselbe Oberfläche als eigenständige
-App für Mac und Linux. Die Dateien bleiben auf dem Rechner, die Texterkennung
+App für Windows, Mac und Linux. Die Dateien bleiben auf dem Rechner, die Texterkennung
 läuft lokal.
 
 ## Was die App kann
@@ -38,18 +38,35 @@ erscheinen in der Sprache des Systems; 26 Sprachen sind enthalten.
 
 ## Installieren
 
-Fertige Pakete folgen unter [Releases](../../releases). Bis dahin lässt sich die
-App aus dem Quelltext bauen (siehe unten).
+Fertige Pakete stehen unter [Releases](../../releases/latest). Die Dateinamen
+tragen keine Versionsnummer, damit Freigaben in Virenschutz und Softwareverteilung
+nicht bei jeder neuen Version erneuert werden müssen; die Version steht in der App
+unter **Über OpenIntraPDF**.
 
 | System | Paket | Texterkennung | geprüft mit |
 |---|---|---|---|
-| macOS (Apple Silicon) | `OpenIntraPDF.app` | mitgeliefert | macOS 27 |
+| Windows 10/11 (x64) | `OpenIntraPDF.msi` | mitgeliefert | Windows 11 |
+| macOS (Apple Silicon) | `OpenIntraPDF-macos-arm64.zip` | mitgeliefert | macOS 27 |
 | Debian, Ubuntu, OpenIntraOS | `.deb` | aus der Distribution (`tesseract-ocr`) | Debian 13, Ubuntu 24.04 |
 | Fedora | `.rpm` | aus der Distribution (`tesseract`) | aktuelle Fedora |
 | Arch Linux | `.pkg.tar.zst` | aus der Distribution (`tesseract`) | aktueller Stand |
 
 Das Linux-Programm braucht glibc 2.34 oder neuer und WebKitGTK 4.1. Gedruckt
 wird über den Druckdialog von KDE (Okular, empfohlen).
+
+**Windows:** Das MSI installiert für alle Benutzer nach
+`C:\Program Files\OpenIntraPDF` und trägt die App unter „Öffnen mit“ und den
+Standard-Apps ein, ohne sich selbst zum Standard zu machen. Es braucht die
+Microsoft-Edge-WebView2-Laufzeit, die zu Windows 11 und den meisten
+Windows-10-Rechnern gehört. Eine neue Version ersetzt die alte. Für die
+Verteilung im Netzwerk, etwa als Startskript einer Gruppenrichtlinie:
+
+```bat
+msiexec /i \\server\freigabe\OpenIntraPDF.msi /qn /norestart
+```
+
+Die App ist nicht signiert: Windows SmartScreen und macOS Gatekeeper fragen
+beim ersten Start nach.
 
 ## Selbst bauen
 
@@ -85,6 +102,17 @@ OPENINTRAPDF_BAUSERVER=root@mein-docker-host ./bauen-linux.sh --pruefen
 `--pruefen` installiert die drei Pakete danach probeweise in Debian-, Ubuntu-,
 Fedora- und Arch-Containern.
 
+**Windows** – gebaut wird auf dem Mac (Go, Wails v2, Node.js, `librsvg`,
+`zstd`, `objdump` aus binutils); Tesseract kommt samt Bibliotheken aus den
+Paketen von [MSYS2](https://www.msys2.org) (jedes gegen die Prüfsumme der
+Paketdatenbank geprüft), das MSI baut [msitools](https://gitlab.gnome.org/GNOME/msitools)
+(`wixl`) in einem Debian-Container:
+
+```sh
+cd oberflaeche && npm ci && cd ..
+OPENINTRAPDF_BAUSERVER=root@mein-docker-host ./bauen-windows.sh   # → build/windows/OpenIntraPDF.msi
+```
+
 **Tests**
 
 ```sh
@@ -114,7 +142,10 @@ umfasst (Apache-2.0, Abschnitt 6).
 
 OpenIntraPDF is a desktop PDF tool: read, reorder pages, annotate, recognize
 text (OCR), export to DOCX/ODT/XLSX/CSV, merge, protect and print – locally,
-without a server or account. It is the desktop edition of the PDF workspace in
-[OpenIntraHub](https://openintrahub.org). The interface follows the system
-language (26 languages). Licensed under Apache-2.0, © 2026 Jan Günther;
+without a server or account, on Windows, macOS and Linux. It is the desktop
+edition of the PDF workspace in [OpenIntraHub](https://openintrahub.org). The
+interface follows the system language (26 languages). Ready-made packages
+(Windows MSI, macOS, deb, rpm, Arch) are attached to the
+[latest release](../../releases/latest); their file names carry no version
+number, so antivirus and deployment exclusions stay valid across updates. Licensed under Apache-2.0, © 2026 Jan Günther;
 third-party licenses are listed in the app under *Help → Licenses*.

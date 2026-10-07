@@ -15,8 +15,8 @@ import (
 // Mac ohne Homebrew erkennen koennen. Im Paket liegt das Programm neben
 // dem eigenen unter Contents/MacOS/tesseract, seine Bibliotheken unter
 // Contents/Frameworks (Ladepfade @executable_path/../Frameworks), die
-// Sprachdaten unter Contents/Resources/tessdata. Windows folgt demselben
-// Weg mit tesseract.exe neben der App und tessdata daneben.
+// Sprachdaten unter Contents/Resources/tessdata. Unter Windows liegt alles
+// im Unterordner tesseract\ neben der App (tesseractOrte je System).
 //
 // Nur zum Entwickeln, wenn kein Paket gebaut ist: OPENINTRAPDF_TESSERACT
 // (Pfad zum Programm) und OPENINTRAPDF_TESSDATA, sonst das Programm aus
@@ -28,12 +28,10 @@ func tesseractFinden() erkennung.Tesseract {
 	t := erkennung.Tesseract{Programm: "tesseract", Sprachen: erkennung.VorgabeSprachen}
 	if exe, err := os.Executable(); err == nil {
 		exe, _ = filepath.EvalSymlinks(exe)
-		ordner := filepath.Dir(exe)
-		programm := filepath.Join(ordner, tesseractName)
-		tessdata := filepath.Join(ordner, "..", "Resources", "tessdata")
+		programm, tessdata := tesseractOrte(filepath.Dir(exe))
 		if istDatei(programm) {
 			t.Programm = programm
-			if istOrdner(tessdata) {
+			if tessdata != "" && istOrdner(tessdata) {
 				t.Tessdata = filepath.Clean(tessdata)
 			}
 			return t

@@ -15,7 +15,7 @@
   "info": {
     "companyName": "Jan Günther",
     "productName": "OpenIntraPDF",
-    "productVersion": "0.9.3",
+    "productVersion": "0.9.4",
     "copyright": "© 2026 Jan Günther · Apache-2.0",
     "comments": "PDF lesen, Seiten ordnen, kommentieren, Text erkennen, exportieren, binden."
   }

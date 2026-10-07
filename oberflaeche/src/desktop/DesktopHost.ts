@@ -17,6 +17,7 @@
 
 import i18n from 'i18next';
 import { PdfHostFehler } from '../openintrapdf/typen';
+import { pdfDrucken } from '../openintrapdf/hilfen';
 import type {
     AnalyseBefehl, AuftragVeroeffentlichen, BindeBefehl, CommitBefehl, DruckBefehl, ExportBefehl, ExtraktBefehl, OcrBefehl, PdfHost,
     PdfLadung, ZielAnfrage,
@@ -94,6 +95,13 @@ export interface DesktopHostOptionen {
     onRasterFehler?: (auftragId: string, seite: number, fehler: unknown) => void;
     /** Die Go-Seite kennt einen Weg auf den Standarddrucker ohne Dialog (Etappe 8). */
     schnelldruck?: boolean;
+    /**
+     * Drucken über die PDF-Anzeige der Webansicht statt über die Go-Seite
+     * (Windows, 06.10.2026). Dort gab die Go-Seite die Kopie an das
+     * Standard-PDF-Programm -- ist das OpenIntraPDF selbst, öffnet es sich
+     * nur wieder. WebView2 druckt PDFs selbst, mit dem Druckdialog von Windows.
+     */
+    browserDruck?: boolean;
 }
 
 /**
@@ -154,6 +162,10 @@ export function desktopHost(id: string, b: Bruecke, optionen: DesktopHostOptione
         ...(person ? { person: { name: person } } : {}),
 
         async laden(): Promise<PdfLadung> {
+            // Erst den Stand der Platte holen: „Neu laden“ nach einem
+            // Konflikt bekam bis Bau 2342 die alten Bytes aus dem Speicher der
+            // Go-Seite (Review 07.10.2026).
+            await ruf(() => b.Neuladen(id));
             const info = await ruf(() => b.Info(id)).catch(() => undefined);
             const antwort = await bytesHolen(dateiPfad);
             const kopfVersion = Number(antwort.headers.get('X-File-Version')) || undefined;
@@ -164,12 +176,16 @@ export function desktopHost(id: string, b: Bruecke, optionen: DesktopHostOptione
 
         // Kein herunterladen: Die Datei liegt schon auf der Platte; „Kopie
         // sichern unter …“ steht im Menü Ablage (App.tsx, Jan 01.10.2026).
-        drucken: () => ruf(() => b.Drucken(id)),
+        drucken: optionen.browserDruck
+            ? async () => pdfDrucken(await (await bytesHolen(dateiPfad)).blob())
+            : () => ruf(() => b.Drucken(id)),
 
         // Drucken mit Seitenbereich (Etappe 8): Die Go-Seite baut die
-        // Teil-PDF und druckt die Bytes über ihren Druckweg.
+        // Teil-PDF und druckt die Bytes über ihren Druckweg -- ausser mit
+        // browserDruck: Ohne bytesDrucken druckt der Arbeitsplatz die
+        // Teil-PDF selbst (pdfDrucken).
         druckfassung: async (befehl: DruckBefehl) => base64ZuBytes(await ruf(() => b.Druckfassung(id, befehl))),
-        bytesDrucken: (daten: ArrayBuffer, name: string) => ruf(() => b.BytesDrucken(name, bytesZuBase64(daten))),
+        ...(optionen.browserDruck ? {} : { bytesDrucken: (daten: ArrayBuffer, name: string) => ruf(() => b.BytesDrucken(name, bytesZuBase64(daten))) }),
         ...(optionen.schnelldruck ? { schnelldruck: () => ruf(() => b.Schnelldruck(id)) } : {}),
 
         // Rechte-Kennwort pruefen (#247): derselbe Go-Kern wie im Server.

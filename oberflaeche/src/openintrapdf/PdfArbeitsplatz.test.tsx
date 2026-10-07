@@ -187,20 +187,33 @@ describe('Seiten verwalten', () => {
 
     it('Schließen mit Entwurf fragt nach: Speichern, Verwerfen, Weiter bearbeiten', async () => {
         const onClose = vi.fn();
+        // Die Desktop-App lässt damit ein wartendes zweites Dokument fallen (Review 07.10.2026).
+        const onSchliessenAbgebrochen = vi.fn();
+        // Drive hält damit das Verlassen der Seite an (useBlocker, 07.10.2026).
+        const onEntwurf = vi.fn();
         const h = gastgeber();
-        render(<PdfArbeitsplatz host={h} name="Angebot.pdf" onClose={onClose} />);
+        render(<PdfArbeitsplatz host={h} name="Angebot.pdf" onClose={onClose} onSchliessenAbgebrochen={onSchliessenAbgebrochen} onEntwurf={onEntwurf} />);
         await screen.findByTestId('leseansicht');
+        expect(onEntwurf).toHaveBeenLastCalledWith(false);
         fireEvent.click(await screen.findByRole('button', { name: 'Bearbeiten' }));
         fireEvent.click((await screen.findAllByRole('option'))[1]);
         fireEvent.click(bandKnopf('90° links'));
+        await waitFor(() => expect(onEntwurf).toHaveBeenLastCalledWith(true));
         fireEvent.click(screen.getByRole('button', { name: 'Schließen' }));
         expect(await screen.findByText('Ungespeicherte Änderungen')).toBeInTheDocument();
         expect(onClose).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Weiter bearbeiten' }));
         expect(screen.queryByText('Ungespeicherte Änderungen')).toBeNull();
+        expect(onSchliessenAbgebrochen).toHaveBeenCalledTimes(1);
+        // Esc bricht genauso ab.
+        fireEvent.click(screen.getByRole('button', { name: 'Schließen' }));
+        fireEvent.keyDown(await screen.findByRole('dialog', { name: 'Ungespeicherte Änderungen' }), { key: 'Escape' });
+        await waitFor(() => expect(onSchliessenAbgebrochen).toHaveBeenCalledTimes(2));
+        expect(onClose).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Schließen' }));
         fireEvent.click(await screen.findByRole('button', { name: 'Verwerfen' }));
         expect(onClose).toHaveBeenCalled();
+        expect(onSchliessenAbgebrochen).toHaveBeenCalledTimes(2);
     });
 });
 

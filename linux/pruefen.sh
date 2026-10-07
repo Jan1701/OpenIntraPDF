@@ -25,15 +25,15 @@ pruefe() { # name image installieren entfernen
     docker run --rm -v "$AUSGABE":/pakete:ro "$2" sh -c "$3 && $gemeinsam && $4 && ! test -e /usr/bin/openintrapdf && echo '  ✓ installiert, geprueft, entfernt'"
 }
 pruefe Debian debian:trixie \
-    'apt-get update -qq >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends /pakete/openintrapdf_*.deb >/dev/null' \
+    'apt-get update -qq >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends /pakete/openintrapdf_amd64.deb >/dev/null' \
     'apt-get remove -y -qq openintrapdf >/dev/null'
 pruefe Ubuntu ubuntu:24.04 \
-    'apt-get update -qq >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends /pakete/openintrapdf_*.deb >/dev/null' \
+    'apt-get update -qq >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends /pakete/openintrapdf_amd64.deb >/dev/null' \
     'apt-get remove -y -qq openintrapdf >/dev/null'
 pruefe Fedora fedora:latest \
-    'dnf install -y -q --setopt=install_weak_deps=False /pakete/openintrapdf-*.rpm >/dev/null' \
+    'dnf install -y -q --setopt=install_weak_deps=False /pakete/openintrapdf.x86_64.rpm >/dev/null' \
     'dnf remove -y -q openintrapdf >/dev/null'
 pruefe Arch archlinux:latest \
-    'pacman -Sy --noconfirm --needed >/dev/null 2>&1; pacman -U --noconfirm /pakete/openintrapdf-*.pkg.tar.zst >/dev/null' \
+    'pacman -Sy --noconfirm --needed >/dev/null 2>&1; pacman -U --noconfirm /pakete/openintrapdf-x86_64.pkg.tar.zst >/dev/null' \
     'pacman -R --noconfirm openintrapdf >/dev/null'
 FERN

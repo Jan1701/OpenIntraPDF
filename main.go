@@ -63,6 +63,7 @@ func main() {
 		},
 		Menu:       app.menue(),
 		OnStartup:  app.startup,
+		OnDomReady: app.domBereit,
 		OnShutdown: app.shutdown,
 		Bind:       []any{app},
 		DragAndDrop: &options.DragAndDrop{

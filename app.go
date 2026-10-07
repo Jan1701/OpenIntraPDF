@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	goruntime "runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -163,6 +164,9 @@ type StartInfo struct {
 	Fassung string `json:"fassung"`
 	Bau     string `json:"bau"`
 	Urheber string `json:"urheber"`
+	// System (darwin, linux, windows): Unter Windows druckt die Oberflaeche
+	// selbst ueber die PDF-Anzeige der Webansicht (DesktopHost.ts).
+	System string `json:"system"`
 }
 
 // Geoeffnet ist eine geoeffnete Datei aus Sicht der Oberflaeche.
@@ -180,7 +184,7 @@ func (a *App) Start() StartInfo {
 	a.wartend = nil
 	a.mu.Unlock()
 	info := StartInfo{Person: a.person, OCR: a.ocr.Fassung, OCRFehler: a.ocrFehler, Zuletzt: a.zuletzt.Eintraege(),
-		Schnelldruck: schnelldruckMoeglich(), Fassung: fassung, Bau: bau, Urheber: urheber}
+		Schnelldruck: schnelldruckMoeglich(), Fassung: fassung, Bau: bau, Urheber: urheber, System: goruntime.GOOS}
 	for _, p := range wartend {
 		if g, err := a.oeffnen(p); err == nil {
 			info.Geoeffnet = g
@@ -239,6 +243,16 @@ func (a *App) Schliessen(id string) {
 	a.ablage.Vergessen(id)
 }
 
+// Neuladen holt vor dem Laden den Stand der Platte (Ablage.Auffrischen):
+// Die Oberflaeche ruft es bei jedem Laden, auch bei „Neu laden“ nach einem
+// Konflikt. Ohne Aenderung auf der Platte bleibt alles, wie es ist.
+func (a *App) Neuladen(id string) error {
+	if err := a.ablage.Auffrischen(id); err != nil {
+		return kernFehler(err)
+	}
+	return nil
+}
+
 // Info liefert Stand, Inspektion und Faehigkeiten (GET /api/pdf/files/{id}).
 func (a *App) Info(id string) (*Info, error) {
 	d, err := a.ablage.Datei(id)
@@ -275,13 +289,37 @@ type CommitBefehl struct {
 	Annotations     *dokument.Anmerkungsbefehle `json:"annotations"`
 	// Properties (Etappe 8): Titel, Thema, Autor, Stichwoerter.
 	Properties *dokument.Eigenschaften `json:"properties"`
+	// Sources (Etappe 9): Seiten anderer geoeffneter Dateien, hinten an die
+	// Basis gehaengt; pages nennt sie ab der Seitenzahl der Basis. Fehlte
+	// bis Bau 2342 — „Seiten aus anderer Datei einfuegen“ endete dann beim
+	// Speichern in pdf.invalid_plan (Review 07.10.2026).
+	Sources []BindeQuelle `json:"sources"`
 	// Password und OwnerPassword (Etappe 9): Oeffnen- und Rechte-Kennwort einer
-	// geschuetzten Datei — nur fuer diesen Aufruf, nie gespeichert.
-	Password      string   `json:"password"`
-	OwnerPassword string   `json:"owner_password"`
-	Destination   Ziel     `json:"destination"`
-	Comment       string   `json:"comment"`
-	AcceptLosses  []string `json:"accept_losses"`
+	// geschuetzten Datei, Decrypt nimmt den Schutz — nur fuer diesen Aufruf,
+	// nie gespeichert. Decrypt fehlte bis Bau 2342 („Kennwort entfernen“ endete
+	// in pdf.nothing_to_do).
+	Password      string       `json:"password"`
+	OwnerPassword string       `json:"owner_password"`
+	Decrypt       *Entschluess `json:"decrypt"`
+	Destination   Ziel         `json:"destination"`
+	Comment       string       `json:"comment"`
+	AcceptLosses  []string     `json:"accept_losses"`
+}
+
+// Entschluess ist das Feld decrypt eines Commits: das Kennwort der Datei.
+type Entschluess struct {
+	Password string `json:"password"`
+}
+
+// ohneKennwoerter liefert den Befehl fuer den Hash des Vorgangs wie im
+// Server: ohne Kennwoerter. Eine Wiederholung mit korrigiertem Kennwort ist
+// dieselbe Anfrage.
+func (b CommitBefehl) ohneKennwoerter() CommitBefehl {
+	b.Password, b.OwnerPassword = "", ""
+	if b.Decrypt != nil {
+		b.Decrypt = &Entschluess{}
+	}
+	return b
 }
 
 // Ergebnis ist eine neue Fassung oder neue Datei samt Bericht.
@@ -319,14 +357,32 @@ func (a *App) Speichern(id string, befehl CommitBefehl, schluessel string) (*Erg
 	if err != nil {
 		return nil, err
 	}
+	// Wie der Server (pdf_schreiben.go): ohne Seitenplan, Quellen,
+	// Anmerkungsbefehle, Eigenschaften und Entschluesseln nichts zu tun.
 	hatSeiten := befehl.Pages != nil
+	hatQuellen := len(befehl.Sources) > 0
 	hatAnmerkungen := !befehl.Annotations.Leer()
 	hatEigenschaften := !befehl.Properties.Leer()
-	if !hatSeiten && !hatAnmerkungen && !hatEigenschaften {
+	entschluesseln := befehl.Decrypt != nil
+	if !hatSeiten && !hatQuellen && !hatAnmerkungen && !hatEigenschaften && !entschluesseln {
 		return nil, fehler(http.StatusUnprocessableEntity, "pdf.nothing_to_do", nil)
+	}
+	if entschluesseln && befehl.Decrypt.Password == "" {
+		return nil, ungueltig("decrypt.password fehlt")
 	}
 	if hatSeiten && len(*befehl.Pages) == 0 {
 		return nil, fehler(http.StatusUnprocessableEntity, "pdf.no_pages", nil)
+	}
+	if len(befehl.Sources) > dokument.HoechstQuellen {
+		return nil, kernFehler(dokument.ErrZuVieleQuellen)
+	}
+	for _, q := range befehl.Sources {
+		if q.Pages != nil && len(q.Pages) == 0 {
+			return nil, fehler(http.StatusUnprocessableEntity, "pdf.no_pages", map[string]any{"file_id": q.FileID})
+		}
+		if _, err := a.ablage.Datei(q.FileID); err != nil {
+			return nil, err
+		}
 	}
 	if hatAnmerkungen {
 		if err := befehl.Annotations.Pruefen(); err != nil {
@@ -356,7 +412,7 @@ func (a *App) Speichern(id string, befehl CommitBefehl, schluessel string) (*Erg
 		}
 	}
 	var erg Ergebnis
-	err = a.vorgaenge.Ausfuehren(schluessel, "commit", id, befehl, &erg, func() (any, error) {
+	err = a.vorgaenge.Ausfuehren(schluessel, "commit", id, befehl.ohneKennwoerter(), &erg, func() (any, error) {
 		basis, err := a.ablage.BasisFuer(d, befehl.ExpectedVersion, befehl.ExpectedSHA256, neueFassung)
 		if err != nil {
 			return nil, err
@@ -374,9 +430,22 @@ func (a *App) Speichern(id string, befehl CommitBefehl, schluessel string) (*Erg
 		if hatEigenschaften {
 			eig = befehl.Properties
 		}
+		// Quellen wie beim Binden; eine inzwischen neu geladene Quelle wird
+		// gemeldet, nicht still eingemischt.
+		quellen, err := a.quellenLaden(befehl.Sources)
+		if err != nil {
+			return nil, err
+		}
+		// Entschluesseln nimmt das Kennwort aus decrypt; sonst gelten
+		// password (Oeffnen) und owner_password (Rechte).
+		passwort, besitzer := befehl.Password, befehl.OwnerPassword
+		if entschluesseln {
+			passwort = befehl.Decrypt.Password
+		}
 		var aus bytes.Buffer
 		bericht, anmerkungen, err := dokument.CommitAusfuehren(a.ctxOderHintergrund(), bytes.NewReader(basis), dokument.Commit{
-			Anmerkungen: anm, Plan: plan, Eigenschaften: eig, Passwort: befehl.Password, Besitzerpasswort: befehl.OwnerPassword,
+			Anmerkungen: anm, Plan: plan, Eigenschaften: eig, Quellen: quellen,
+			Passwort: passwort, Besitzerpasswort: besitzer, Entschluesseln: entschluesseln,
 		}, &aus)
 		if err != nil {
 			return nil, kernFehler(err)
@@ -916,16 +985,9 @@ func (a *App) Binden(befehl BindeBefehl, schluessel string) (*Ergebnis, error) {
 	}
 	var erg Ergebnis
 	err = a.vorgaenge.Ausfuehren(schluessel, "merge", "", befehl, &erg, func() (any, error) {
-		quellen := make([]dokument.Quelle, 0, len(befehl.Sources))
-		for _, q := range befehl.Sources {
-			d, err := a.ablage.Datei(q.FileID)
-			if err != nil {
-				return nil, err
-			}
-			if q.ExpectedVersion > 0 && q.ExpectedVersion != d.Version {
-				return nil, fehler(http.StatusPreconditionFailed, "pdf.version_conflict", map[string]any{"file_id": q.FileID, "current_version": d.Version})
-			}
-			quellen = append(quellen, dokument.Quelle{Inhalt: bytes.NewReader(d.Basis), Seiten: q.Pages, Titel: stamm(d.Name)})
+		quellen, err := a.quellenLaden(befehl.Sources)
+		if err != nil {
+			return nil, err
 		}
 		var aus bytes.Buffer
 		bericht, err := dokument.Binden(a.ctxOderHintergrund(), quellen, befehl.BookmarksPerSource, &aus)
@@ -946,6 +1008,24 @@ func (a *App) Binden(befehl BindeBefehl, schluessel string) (*Ergebnis, error) {
 		return nil, err
 	}
 	return &erg, nil
+}
+
+// quellenLaden macht aus Binde-Quellen (Binden und Commit) die Quellen fuer
+// den Kern: die geladenen Bytes jeder geoeffneten Datei. Eine Quelle, die
+// seit der Auswahl eine andere Fassung hat, ist ein Konflikt (412).
+func (a *App) quellenLaden(liste []BindeQuelle) ([]dokument.Quelle, error) {
+	quellen := make([]dokument.Quelle, 0, len(liste))
+	for _, q := range liste {
+		d, err := a.ablage.Datei(q.FileID)
+		if err != nil {
+			return nil, err
+		}
+		if q.ExpectedVersion > 0 && q.ExpectedVersion != d.Version {
+			return nil, fehler(http.StatusPreconditionFailed, "pdf.version_conflict", map[string]any{"file_id": q.FileID, "current_version": d.Version})
+		}
+		quellen = append(quellen, dokument.Quelle{Inhalt: bytes.NewReader(d.Basis), Seiten: q.Pages, Titel: stamm(d.Name)})
+	}
+	return quellen, nil
 }
 
 // QuelleInfo ist GET /api/pdf/files/{id} fuer eine Quelle beim Binden.

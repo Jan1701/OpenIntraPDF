@@ -78,13 +78,20 @@ func pruefsumme(inhalt []byte) string {
 }
 
 // Oeffnen liest die Datei und registriert sie. Ist derselbe Pfad schon
-// offen, wird der Eintrag neu geladen und behaelt seine Kennung — ein
-// zweites Fenster gibt es nicht, und zwei Kennungen fuer eine Datei
-// koennten sich beim Speichern ueberholen.
+// offen, kommt der bestehende Eintrag UNVERAENDERT zurueck — Kennung,
+// Fassung und geladene Bytes: Ein zweites Fenster gibt es nicht, zwei
+// Kennungen fuer eine Datei koennten sich beim Speichern ueberholen, und ein
+// offener Entwurf bleibt gueltig. (Bis Bau 2342 lud Oeffnen den Eintrag neu und
+// zaehlte die Fassung hoch; ein Entwurf auf derselben Datei lief dann beim
+// Speichern in einen Konflikt.) Den Stand der Platte holt Auffrischen beim
+// Laden.
 func (a *Ablage) Oeffnen(pfad string) (*Datei, error) {
 	abs, err := filepath.Abs(pfad)
 	if err != nil {
 		return nil, err
+	}
+	if d := a.offen(abs); d != nil {
+		return d, nil
 	}
 	st, err := os.Stat(abs)
 	if err != nil {
@@ -100,25 +107,77 @@ func (a *Ablage) Oeffnen(pfad string) (*Datei, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !bytes.Contains(inhalt[:min(len(inhalt), 1024)], []byte("%PDF-")) {
+	if !istPDF(inhalt) {
 		return nil, dokument.ErrKeinPDF
 	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	var d *Datei
 	for _, e := range a.dateien {
 		if e.Pfad == abs {
-			d = e
-			break
+			return e, nil // inzwischen von einem zweiten Aufruf registriert
 		}
 	}
-	if d == nil {
-		d = &Datei{ID: kennung(), Pfad: abs, Name: filepath.Base(abs)}
-		a.dateien[d.ID] = d
-	}
-	d.Version = max(d.Version, 0) + 1
+	d := &Datei{ID: kennung(), Pfad: abs, Name: filepath.Base(abs), Version: 1}
 	d.standSetzen(st, inhalt)
+	a.dateien[d.ID] = d
 	return d, nil
+}
+
+// offen liefert den Eintrag zu einem absoluten Pfad, sonst nil.
+func (a *Ablage) offen(abs string) *Datei {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	for _, e := range a.dateien {
+		if e.Pfad == abs {
+			return e
+		}
+	}
+	return nil
+}
+
+// istPDF: Der Kopf %PDF- steht in den ersten 1024 Byte.
+func istPDF(inhalt []byte) bool {
+	return bytes.Contains(inhalt[:min(len(inhalt), 1024)], []byte("%PDF-"))
+}
+
+// Auffrischen holt den Stand der Platte in den Eintrag, wenn sich die Datei
+// seit dem Laden geaendert hat: neue Bytes, Fassung + 1. Das braucht „Neu
+// laden“ nach einem Konflikt — bis Bau 2342 lieferte es die alten Bytes aus dem
+// Speicher, und der naechste Speicherversuch lief wieder in den Konflikt
+// (Review 07.10.2026). Ein blosses touch aendert nichts. Ist die Datei
+// verschwunden oder unlesbar, bleibt der geladene Stand; Speichern meldet
+// das dann.
+func (a *Ablage) Auffrischen(id string) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	d, ok := a.dateien[id]
+	if !ok {
+		return nichtGefunden()
+	}
+	st, err := os.Stat(d.Pfad)
+	if err != nil || st.IsDir() {
+		return nil
+	}
+	if st.Size() == d.Groesse && st.ModTime().Equal(d.Geaendert) {
+		return nil
+	}
+	if st.Size() > dokument.HoechstBytes {
+		return dokument.ErrZuGross
+	}
+	inhalt, err := os.ReadFile(d.Pfad)
+	if err != nil {
+		return nil
+	}
+	if pruefsumme(inhalt) == d.SHA256 {
+		d.Groesse, d.Geaendert = st.Size(), st.ModTime()
+		return nil
+	}
+	if !istPDF(inhalt) {
+		return dokument.ErrKeinPDF
+	}
+	d.Version++
+	d.standSetzen(st, inhalt)
+	return nil
 }
 
 // standSetzen uebernimmt Bytes und Plattenstand in den Eintrag.

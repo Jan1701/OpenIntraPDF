@@ -5,6 +5,9 @@
 // Seitenbilder eines Auftrags samt Abbruch. Alle Daten sind erfunden.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const druck = vi.hoisted(() => ({ pdfDrucken: vi.fn(async (_blob: Blob) => undefined) }));
+vi.mock('../openintrapdf/hilfen', async (original) => ({ ...(await original<typeof import('../openintrapdf/hilfen')>()), pdfDrucken: druck.pdfDrucken }));
 import { PdfHostFehler } from '../openintrapdf/typen';
 import type { CommitBefehl, OcrBefehl } from '../openintrapdf/typen';
 import { base64ZuBytes, bytesZuBase64, desktopHost, hostFehler } from './DesktopHost';
@@ -29,6 +32,7 @@ function bruecke(ueber: Partial<Bruecke> = {}): Bruecke & { aufrufe: string[] } 
         ZuletztOeffnen: merken('ZuletztOeffnen', { id: 'f1', name: 'Probe.pdf' }),
         Zuletzt: merken('Zuletzt', []),
         Schliessen: merken('Schliessen', undefined),
+        Neuladen: merken('Neuladen', undefined),
         Info: merken('Info', { file_id: 'f1', name: 'Probe.pdf', version: 3, sha256: 'a'.repeat(64), access: 'edit' as const }),
         Speichern: merken('Speichern', { file_id: 'f1', version: 4, sha256: 'b'.repeat(64), name: 'Probe.pdf' }),
         Extrahieren: merken('Extrahieren', { files: [] }),
@@ -111,7 +115,14 @@ describe('desktopHost', () => {
         expect(ladung.sha256).toBe('a'.repeat(64));
         expect(ladung.info?.name).toBe('Probe.pdf');
         expect(host.person).toEqual({ name: 'Erika Musterfrau' });
-        expect(b.aufrufe).toContain('Info("f1")');
+        // Erst den Stand der Platte holen, dann Info (Review 07.10.2026: „Neu laden“ bekam alte Bytes).
+        expect(b.aufrufe.slice(0, 2)).toEqual(['Neuladen("f1")', 'Info("f1")']);
+    });
+
+    it('scheitert Neuladen (Datei ist kein PDF mehr), scheitert das Laden mit der Meldung der Go-Seite', async () => {
+        const b = bruecke({ Neuladen: vi.fn(async () => { throw new Error('{"status":422,"code":"pdf.not_pdf"}'); }) });
+        const host = desktopHost('f1', b, { rasterer: rasterer([]) });
+        await expect(host.laden()).rejects.toMatchObject({ status: 422, code: 'pdf.not_pdf' });
     });
 
     it('reicht Speichern mit Schlüssel durch und übersetzt einen 412', async () => {
@@ -216,6 +227,21 @@ describe('Drucken mit Seitenbereich und Schnelldruck (Etappe 8)', () => {
         const falsch = bruecke({ RechteKennwortPruefen: async () => { throw new Error(JSON.stringify({ status: 422, code: 'pdf.wrong_password', params: {} })); } });
         await expect(desktopHost('f1', falsch, { rasterer: rasterer([]) }).rechteKennwortPruefen!('falsch-789'))
             .rejects.toMatchObject({ status: 422, code: 'pdf.wrong_password' });
+    });
+
+    it('Windows (browserDruck): druckt über die Webansicht, nicht über die Go-Seite', async () => {
+        druck.pdfDrucken.mockClear();
+        const b = bruecke();
+        const h = desktopHost('f1', b, { rasterer: rasterer([]), browserDruck: true });
+        expect(h.bytesDrucken).toBeUndefined();
+        await h.drucken!();
+        expect(druck.pdfDrucken).toHaveBeenCalledTimes(1);
+        expect(b.aufrufe.some(a => a.startsWith('Drucken('))).toBe(false);
+        // Mac und Linux unverändert über die Go-Seite
+        const m = desktopHost('f1', b, { rasterer: rasterer([]) });
+        expect(m.bytesDrucken).toBeDefined();
+        await m.drucken!();
+        expect(b.aufrufe).toContain('Drucken("f1")');
     });
 
     it('schnelldruck gibt es nur, wenn die Go-Seite ihn meldet', async () => {

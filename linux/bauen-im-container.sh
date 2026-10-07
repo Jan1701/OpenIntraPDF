@@ -30,7 +30,9 @@ echo "glibc: $(objdump -T /tmp/openintrapdf | grep -o 'GLIBC_[0-9.]*' | sort -V 
 
 GOBIN=/tmp/werkzeug go install github.com/goreleaser/nfpm/v2/cmd/nfpm@$NFPM
 sed -e "s/@BAU@/$BAU/" linux/nfpm.yaml > /tmp/nfpm.yaml
-for format in deb rpm archlinux; do
-    /tmp/werkzeug/nfpm package -f /tmp/nfpm.yaml -p "$format" -t /ausgabe/ >/dev/null
-done
+# Dateinamen OHNE Fassung (Jan 06.10.2026, SentinelOne-Ausnahmen); die
+# Fassung steht in den Paketdaten.
+/tmp/werkzeug/nfpm package -f /tmp/nfpm.yaml -p deb -t /ausgabe/openintrapdf_amd64.deb >/dev/null
+/tmp/werkzeug/nfpm package -f /tmp/nfpm.yaml -p rpm -t /ausgabe/openintrapdf.x86_64.rpm >/dev/null
+/tmp/werkzeug/nfpm package -f /tmp/nfpm.yaml -p archlinux -t /ausgabe/openintrapdf-x86_64.pkg.tar.zst >/dev/null
 ls /ausgabe

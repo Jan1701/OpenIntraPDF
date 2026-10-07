@@ -322,6 +322,7 @@ func (f *Werkzeugfehler) Error() string {
 func Lauf(ctx context.Context, programm string, args ...string) ([]byte, error) {
 	name := filepath.Base(programm)
 	befehl := exec.CommandContext(ctx, programm, args...)
+	ohneFenster(befehl)
 	var aus bytes.Buffer
 	fehl := &kappe{rest: 2048}
 	befehl.Stdout = &aus

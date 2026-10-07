@@ -120,6 +120,19 @@ export interface PdfArbeitsplatzProps {
     /** Anzeigename, bis die Info des Gastgebers da ist. */
     name: string;
     onClose: () => void;
+    /**
+     * Die Rückfrage beim Schließen endete ohne Schließen: „Weiter
+     * bearbeiten“, Abbrechen/Esc oder „Speichern“ ohne Erfolg. Die
+     * Desktop-App lässt dann ein wartendes zweites Dokument fallen (Review
+     * 07.10.2026: bis Bau 2342 ersetzte Öffnen den Entwurf ohne Rückfrage).
+     */
+    onSchliessenAbgebrochen?: () => void;
+    /**
+     * Ob gerade ungespeicherte Änderungen offen sind — bei jedem Wechsel.
+     * Drive hält damit das Verlassen der Seite an (useBlocker), solange
+     * die Rückfrage nicht beantwortet ist.
+     */
+    onEntwurf?: (offen: boolean) => void;
     /** Nach erfolgreichem Speichern (neue Fassung oder neue Datei). */
     onGespeichert?: (ergebnis: CommitErgebnis, ziel: CommitZiel['kind']) => void;
     /** Nach erfolgreichem Extrahieren/Teilen. */
@@ -210,7 +223,7 @@ function istEingabe(ziel: EventTarget | null): boolean {
     return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable;
 }
 
-export function PdfArbeitsplatz({ host, name, onClose, onGespeichert, onExtrahiert, onExportiert, onGebunden, thema: themaVorgabe, befehle }: PdfArbeitsplatzProps) {
+export function PdfArbeitsplatz({ host, name, onClose, onSchliessenAbgebrochen, onEntwurf, onGespeichert, onExtrahiert, onExportiert, onGebunden, thema: themaVorgabe, befehle }: PdfArbeitsplatzProps) {
     const { t, i18n } = useTranslation();
     const tRef = useRef(t);
     tRef.current = t;
@@ -1300,6 +1313,15 @@ export function PdfArbeitsplatz({ host, name, onClose, onGespeichert, onExtrahie
         ansagen(t('openintrapdf.konflikt.neuGeladen'));
     };
 
+    // Den Gastgeber wissen lassen, ob ein Entwurf offen ist (Drive: Verlassen
+    // der Seite anhalten). Als Verweis, damit ein neuer Rückruf je Rendern
+    // nicht jedes Mal meldet.
+    const onEntwurfRef = useRef(onEntwurf);
+    onEntwurfRef.current = onEntwurf;
+    useEffect(() => {
+        onEntwurfRef.current?.(entwurfOffen);
+    }, [entwurfOffen]);
+
     // Beim Verlassen der Seite mit offenem Entwurf fragt der Browser nach.
     useEffect(() => {
         if (!entwurfOffen) return;
@@ -1453,6 +1475,10 @@ export function PdfArbeitsplatz({ host, name, onClose, onGespeichert, onExtrahie
         if (entwurfOffen) setDialog({ art: 'schliessen' });
         else onClose();
     };
+    const schliessenAbbrechen = () => {
+        setDialog(null);
+        onSchliessenAbgebrochen?.();
+    };
 
     // Befehle von außen (Menü der Desktop-App): dieselben Wege wie die
     // Knöpfe und Tasten, mit denselben Sperren.
@@ -1478,6 +1504,7 @@ export function PdfArbeitsplatz({ host, name, onClose, onGespeichert, onExtrahie
     const escape = () => {
         if (stand.art === 'verlust') { aktiverSpeicher.zuruecksetzen(); return; }
         if (binden.stand.art === 'verlust') { binden.zuruecksetzen(); return; }
+        if (dialog?.art === 'schliessen') { schliessenAbbrechen(); return; }
         if (dialog) { setDialog(null); return; }
         if (ladeStand.art === 'passwort') { passwortAbbrechen(); return; }
         // Esc beendet zuerst das Werkzeug (Konzept Kap. 02).
@@ -2179,13 +2206,14 @@ export function PdfArbeitsplatz({ host, name, onClose, onGespeichert, onExtrahie
             )}
 
             {dialog?.art === 'schliessen' && (
-                <Dialog titel={t('openintrapdf.schliessen.titel')} onAbbrechen={() => setDialog(null)}
+                <Dialog titel={t('openintrapdf.schliessen.titel')} onAbbrechen={schliessenAbbrechen}
                     aktionen={<>
-                        <button type="button" className={knopf} data-autofocus onClick={() => setDialog(null)}>{t('openintrapdf.schliessen.weiter')}</button>
+                        <button type="button" className={knopf} data-autofocus onClick={schliessenAbbrechen}>{t('openintrapdf.schliessen.weiter')}</button>
                         <button type="button" className={rahmenKnopf} onClick={onClose}>{t('openintrapdf.schliessen.verwerfen')}</button>
                         <button type="button" className={hauptKnopf} onClick={async () => {
                             setDialog(null);
                             if (await speichernStandard()) onClose();
+                            else onSchliessenAbgebrochen?.();
                         }}>
                             {signiert && bearbeitenMoeglich ? t('openintrapdf.aktion.neueDatei') : t('openintrapdf.schliessen.speichern')}
                         </button>
