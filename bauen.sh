@@ -9,7 +9,8 @@
 #   3. wails build -platform darwin/arm64 (Go, Paketierung, ad hoc)
 #   4. Tesseract samt Bibliotheken und Sprachdaten in die App
 #   5. LICENSE und Lizenzverzeichnis (alle mitgelieferten Teile) in die App
-#   6. ad hoc signieren, otool-Pruefung, Groesse
+#   6. signieren (Developer ID, sonst ad hoc), otool-Pruefung, Groesse
+#   7. mit Developer ID notarisieren; Release-Zip build/OpenIntraPDF-macos-arm64.zip
 #
 # Voraussetzungen: Go 1.27, Xcode, Wails v2 CLI (~/go/bin/wails), node_modules
 # in core/frontend (npm ci), Homebrew-Tesseract zum Umpacken, rsvg-convert.
@@ -96,7 +97,34 @@ go run ./lizenzverzeichnis -aus "$APP/Contents/Resources/lizenzen" -ocr "$HIER/b
 [ -f "$HIER/build/darwin/OpenIntraPDF.icns" ] && cp "$HIER/build/darwin/OpenIntraPDF.icns" "$APP/Contents/Resources/iconfile.icns"
 
 # --- 6. Signieren und pruefen ------------------------------------------------
-codesign --force --deep --sign - "$APP"
+# Mit Developer-ID (Apple Developer Program; Jan 07.10.2026 zur Warnung
+# „nicht geöffnet“: „das müssen wir irgendwie einfacher hinbekommen“): jede
+# Mach-O-Datei einzeln von innen nach außen, Hardened Runtime, Zeitstempel —
+# --deep signiert verschachtelte Teile nicht verlässlich. Bibliotheken,
+# Tesseract und App tragen dieselbe Team-ID, sonst lehnt die Hardened Runtime
+# die Bibliotheken ab. Ohne Developer-ID wie bisher ad hoc (reicht für den
+# eigenen Mac, Gatekeeper warnt beim Herunterladen).
+#
+#   OPENINTRAPDF_SIGNATUR  Identität; leer: die einzige „Developer ID
+#                          Application“ im Schlüsselbund, sonst ad hoc
+#   OPENINTRAPDF_NOTAR     Profil für xcrun notarytool (einmalig anlegen mit
+#                          xcrun notarytool store-credentials openintrapdf);
+#                          „-“ überspringt die Notarisierung
+IDENTITAET="${OPENINTRAPDF_SIGNATUR:-}"
+if [ -z "$IDENTITAET" ]; then
+    IDS="$(security find-identity -v -p codesigning 2>/dev/null | grep -o '"Developer ID Application: [^"]*"' | tr -d '"' || true)"
+    [ "$(printf '%s' "$IDS" | grep -c .)" = "1" ] && IDENTITAET="$IDS"
+fi
+NOTAR="${OPENINTRAPDF_NOTAR:-openintrapdf}"
+if [ -n "$IDENTITAET" ]; then
+    signieren() { codesign --force --options runtime --timestamp --sign "$IDENTITAET" "$1"; }
+    for f in "$APP"/Contents/Frameworks/*.dylib "$APP/Contents/MacOS/tesseract"; do signieren "$f"; done
+    signieren "$APP"
+    echo "✓ signiert: $IDENTITAET"
+else
+    codesign --force --deep --sign - "$APP"
+    echo "✓ ad hoc signiert (keine Developer ID im Schlüsselbund)"
+fi
 codesign --verify --deep --strict "$APP"
 
 fehler=0
@@ -110,3 +138,23 @@ done < <(find "$APP" -type f)
 [ $fehler -eq 0 ] || exit 1
 echo "✓ otool -L: kein Verweis auf /opt/homebrew oder /usr/local"
 echo "✓ $APP ($(du -sh "$APP" | cut -f1))"
+
+# --- 7. Notarisieren und Release-Zip ------------------------------------------
+# Nur mit Developer-ID: Apple prüft die App (notarytool, wenige Minuten), das
+# Ticket wird angeheftet (stapler) — dann öffnet macOS sie auch ohne Netz
+# nach dem Herunterladen ohne Warnung. Die Zip für das Release entsteht aus
+# der fertigen App; ihr Name trägt keine Versionsnummer (Jan 06.10.2026).
+ZIP="$HIER/build/OpenIntraPDF-macos-arm64.zip"
+rm -f "$ZIP"
+if [ -n "$IDENTITAET" ] && [ "$NOTAR" != "-" ]; then
+    ditto -c -k --keepParent "$APP" "$ZIP"
+    xcrun notarytool submit "$ZIP" --keychain-profile "$NOTAR" --wait | tee "$HIER/build/notarisierung.log" | grep -E "status:|id:" | tail -2
+    grep -q "status: Accepted" "$HIER/build/notarisierung.log" \
+        || { echo "✗ Notarisierung nicht angenommen (Protokoll: xcrun notarytool log <id> --keychain-profile $NOTAR)"; exit 1; }
+    xcrun stapler staple "$APP" >/dev/null
+    spctl --assess --type execute "$APP" || { echo "✗ Gatekeeper lehnt die notarisierte App ab"; exit 1; }
+    rm -f "$ZIP"
+    echo "✓ notarisiert und Ticket angeheftet"
+fi
+ditto -c -k --keepParent "$APP" "$ZIP"
+echo "✓ $ZIP ($(du -h "$ZIP" | cut -f1))"
