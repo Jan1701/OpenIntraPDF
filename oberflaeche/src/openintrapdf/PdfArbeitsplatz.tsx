@@ -318,7 +318,13 @@ export function PdfArbeitsplatz({ host, name, onClose, onSchliessenAbgebrochen, 
                 let neueInfo = ladung.info;
                 if (!neueInfo && host.info) neueInfo = await host.info().catch(() => undefined);
                 if (verworfen) return;
-                const task = bibliothek.pdfjs.getDocument({ data: new Uint8Array(ladung.daten), enableXfa: false });
+                // enableXfa (seit 2345, 07.10.2026): Dynamische XFA-Formulare (Adobe
+                // LiveCycle, z. B. der AOK-Urlaubsplaner) tragen auf der PDF-Seite nur
+                // den Platzhalter „Please wait…“; den Inhalt zeichnet pdf.js als
+                // HTML-Ebene. Bearbeiten bleibt aus (Server: xfa_form), Felder sind
+                // nicht bedienbar (pdfjsLaden.ts) -- ausgefüllt speichern kann
+                // OpenIntraPDF sie nicht.
+                const task = bibliothek.pdfjs.getDocument({ data: new Uint8Array(ladung.daten), ...bibliothek.dokumentOptionen, enableXfa: true });
                 aufgabe = task;
                 task.onPassword = (antworten: (pw: string) => void, grund: number) => {
                     if (verworfen) return;
@@ -1029,7 +1035,7 @@ export function PdfArbeitsplatz({ host, name, onClose, onSchliessenAbgebrochen, 
             try {
                 const daten = await host.ergebnisLaden!(fertigerAuftrag);
                 if (verworfen) return;
-                const task = geladen.bibliothek.pdfjs.getDocument({ data: new Uint8Array(daten), enableXfa: false });
+                const task = geladen.bibliothek.pdfjs.getDocument({ data: new Uint8Array(daten), ...geladen.bibliothek.dokumentOptionen, enableXfa: false });
                 aufgabe = task;
                 const ergebnis = await task.promise;
                 if (verworfen) return;
@@ -1084,7 +1090,7 @@ export function PdfArbeitsplatz({ host, name, onClose, onSchliessenAbgebrochen, 
             try {
                 const daten = await host.fassungLaden!(version);
                 if (verworfen) return;
-                const task = geladen.bibliothek.pdfjs.getDocument({ data: new Uint8Array(daten), enableXfa: false });
+                const task = geladen.bibliothek.pdfjs.getDocument({ data: new Uint8Array(daten), ...geladen.bibliothek.dokumentOptionen, enableXfa: false });
                 aufgabe = task;
                 const ergebnis = await task.promise;
                 if (verworfen) return;
@@ -1997,6 +2003,7 @@ export function PdfArbeitsplatz({ host, name, onClose, onSchliessenAbgebrochen, 
             {/* Hinweise, die man kennen muss, bevor man weiterarbeitet */}
             <Hinweiszeilen>
                 {signiert && darfGrundsaetzlich && <Hinweis art="warnung">{t('openintrapdf.hinweis.signiert')}</Hinweis>}
+                {(info?.inspection?.xfa || geladen?.dokument.isPureXfa) && <Hinweis art="info">{t('openintrapdf.hinweis.xfa')}</Hinweis>}
                 {fassungWahl && (
                     <Hinweis art="warnung">
                         <div role="status" className="flex flex-wrap items-center gap-x-3 gap-y-2">

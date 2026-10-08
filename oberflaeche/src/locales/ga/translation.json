@@ -171,6 +171,7 @@
     },
     "hinweis": {
       "signiert": "Tá síniú ann; níor seiceáladh a bhailíocht. Fanann an bhunchóip gan athrú – is féidir í a chur in eagar mar chóip.",
+      "xfa": "Foirm XFA (Adobe LiveCycle): taispeánann OpenIntraPDF í, ach ní féidir í a chur in eagar ná a shábháil i ndiaidh a líonta. Chun í a líonadh, oscail in Adobe Acrobat Reader í.",
       "entwurfVerborgen": "Níor sábháladh do dhréacht fós. Taispeánann an t-amharc léitheoireachta an leagan sábháilte; feiceann tú na hathruithe faoi „Cuir in Eagar“.",
       "bericht": "Nótaí faoin sábháil:"
     },

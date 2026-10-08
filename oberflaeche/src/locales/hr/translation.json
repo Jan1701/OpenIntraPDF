@@ -141,6 +141,7 @@
     },
     "hinweis": {
       "signiert": "Potpis postoji; valjanost nije provjerena. Izvornik ostaje nepromijenjen – uređivanje je moguće kao kopija.",
+      "xfa": "XFA obrazac (Adobe LiveCycle): OpenIntraPDF ga prikazuje, ali ga ne može ni uređivati ni spremiti ispunjenog. Za ispunjavanje otvorite ga u programu Adobe Acrobat Reader.",
       "entwurfVerborgen": "Vaš nacrt još nije spremljen. Prikaz za čitanje prikazuje spremljenu verziju; promjene vidite pod „Uredi“.",
       "bericht": "Napomene o spremanju:"
     },

@@ -120,6 +120,7 @@
     },
     "hinweis": {
       "signiert": "Signatur vorhanden; Gültigkeit nicht geprüft. Das Original bleibt unverändert – Bearbeitung als Kopie möglich.",
+      "xfa": "XFA-Formular (Adobe LiveCycle): OpenIntraPDF zeigt es an, kann es aber weder bearbeiten noch ausgefüllt speichern. Zum Ausfüllen in Adobe Acrobat Reader öffnen.",
       "entwurfVerborgen": "Ihr Entwurf ist noch nicht gespeichert. Die Leseansicht zeigt die gespeicherte Fassung; die Änderungen sehen Sie unter „Bearbeiten“.",
       "bericht": "Hinweise zum Speichern:"
     },

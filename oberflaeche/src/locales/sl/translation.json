@@ -158,6 +158,7 @@
     },
     "hinweis": {
       "signiert": "Podpis je prisoten; veljavnost ni preverjena. Izvirnik ostaja nespremenjen – urejanje je mogoče kot kopija.",
+      "xfa": "Obrazec XFA (Adobe LiveCycle): OpenIntraPDF ga prikaže, vendar ga ne more urejati ali shraniti izpolnjenega. Za izpolnjevanje ga odprite v programu Adobe Acrobat Reader.",
       "entwurfVerborgen": "Vaš osnutek še ni shranjen. Pogled za branje prikazuje shranjeno različico; spremembe vidite pod „Urejanje“.",
       "bericht": "Opombe o shranjevanju:"
     },

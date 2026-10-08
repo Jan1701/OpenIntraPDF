@@ -13,7 +13,7 @@ import "strings"
 // Fassung und Bau setzt bauen.sh per -ldflags "-X main.bau=…" aus der
 // BAUNUMMER des Repositorys; ohne das (go test, go run) bleibt der Bau leer.
 var (
-	fassung = "0.9.4"
+	fassung = "0.9.5"
 	bau     = ""
 )
 

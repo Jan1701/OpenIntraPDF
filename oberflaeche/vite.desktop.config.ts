@@ -16,6 +16,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { PDFJS_WASM_BIBLIOTHEKEN, pdfjsDateien } from './vite.pdfjs-dateien';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 
@@ -89,7 +90,13 @@ function drittanbieterListe(ziel: string): Plugin {
                     }
                 }
             }
-            const liste = [...pakete.values()].sort((a, b) => a.name.localeCompare(b.name));
+            // Die Decoder in pdfjs-dist/wasm (pdfjsDateien) haben eigene Lizenzen.
+            const pdfjs = [...pakete.values()].find(p => p.name === 'pdfjs-dist');
+            const zusatz = pdfjs ? PDFJS_WASM_BIBLIOTHEKEN.map(b => ({
+                name: b.name, version: pdfjs.version, license: b.license, dir: path.join(pdfjs.dir, 'wasm'),
+                text_file: path.join(pdfjs.dir, 'wasm', b.datei),
+            })) : [];
+            const liste = [...pakete.values(), ...zusatz].sort((a, b) => a.name.localeCompare(b.name));
             fs.mkdirSync(path.dirname(ziel), { recursive: true });
             fs.writeFileSync(ziel, JSON.stringify(liste, null, 1));
         },
@@ -132,7 +139,7 @@ export default defineConfig({
     // Nichts aus public/ (Flaggen, Schriften, Kataloge von OpenIntraHub):
     // Die App braucht davon nichts, und 24 MB waeren sonst dabei.
     publicDir: false,
-    plugins: [react(), alsIndex(ausgabe), katalogeEindampfen(), drittanbieterListe(jsPakete), menueTexte()],
+    plugins: [react(), alsIndex(ausgabe), katalogeEindampfen(), drittanbieterListe(jsPakete), menueTexte(), pdfjsDateien()],
     css: {
         postcss: {
             plugins: [

@@ -124,6 +124,7 @@
     },
     "hinweis": {
       "signiert": "Handtekening aanwezig; geldigheid niet gecontroleerd. Het origineel blijft ongewijzigd – bewerken als kopie is mogelijk.",
+      "xfa": "XFA-formulier (Adobe LiveCycle): OpenIntraPDF toont het wel, maar kan het niet bewerken of ingevuld opslaan. Open het in Adobe Acrobat Reader om het in te vullen.",
       "entwurfVerborgen": "Uw concept is nog niet opgeslagen. De leesweergave toont de opgeslagen versie; de wijzigingen ziet u onder „Bewerken”.",
       "bericht": "Meldingen bij het opslaan:"
     },

@@ -141,6 +141,7 @@
     },
     "hinweis": {
       "signiert": "Semnătură prezentă; validitatea nu a fost verificată. Originalul rămâne neschimbat – editarea este posibilă ca o copie.",
+      "xfa": "Formular XFA (Adobe LiveCycle): OpenIntraPDF îl afișează, dar nu îl poate edita și nici salva completat. Pentru a-l completa, deschideți-l în Adobe Acrobat Reader.",
       "entwurfVerborgen": "Ciorna dumneavoastră nu a fost încă salvată. Vizualizarea de citire arată versiunea salvată; modificările le vedeți la „Editare”.",
       "bericht": "Observații privind salvarea:"
     },

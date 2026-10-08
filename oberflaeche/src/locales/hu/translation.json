@@ -124,6 +124,7 @@
     },
     "hinweis": {
       "signiert": "Aláírás található; érvényessége nincs ellenőrizve. Az eredeti változatlan marad – szerkesztés másolatként lehetséges.",
+      "xfa": "XFA-űrlap (Adobe LiveCycle): az OpenIntraPDF megjeleníti, de szerkeszteni és kitöltve menteni nem tudja. Kitöltéshez nyissa meg az Adobe Acrobat Readerben.",
       "entwurfVerborgen": "A piszkozata még nincs elmentve. Az olvasási nézet a mentett verziót mutatja; a módosításokat a „Szerkesztés” alatt láthatja.",
       "bericht": "Megjegyzések a mentéshez:"
     },

@@ -84,6 +84,10 @@ const bibliothek = {
     },
     viewer: {},
     viewerStil: '',
+    dokumentOptionen: {
+        wasmUrl: 'https://probe.example/pdfjs/wasm/', cMapUrl: 'https://probe.example/pdfjs/cmaps/', cMapPacked: true,
+        standardFontDataUrl: 'https://probe.example/pdfjs/standard_fonts/', iccUrl: 'https://probe.example/pdfjs/iccs/',
+    },
 };
 
 function info(ueber: Partial<PdfInfo> = {}): PdfInfo {
@@ -133,6 +137,24 @@ async function ersteSeiteDrehen(h: PdfHost) {
 }
 
 const gespeichert = { file_id: 'f1', version: 13, sha256: 'def', name: 'Angebot.pdf' };
+
+describe('XFA-Formular und Hilfsdateien von pdf.js (2345)', () => {
+    it('lädt mit enableXfa und den Hilfsdateien und sagt, dass das Formular nur angezeigt wird', async () => {
+        bibliothek.pdfjs.getDocument.mockClear();
+        await oeffnen(gastgeber({}, info({ inspection: { pages: 1, xfa: true } })));
+        const optionen = (bibliothek.pdfjs.getDocument.mock.calls as unknown as [Record<string, unknown>][])[0][0];
+        expect(optionen.enableXfa).toBe(true);
+        expect(optionen.wasmUrl).toBe('https://probe.example/pdfjs/wasm/');
+        expect(optionen.cMapUrl).toBe('https://probe.example/pdfjs/cmaps/');
+        expect(optionen.standardFontDataUrl).toBe('https://probe.example/pdfjs/standard_fonts/');
+        expect(await screen.findByText(/XFA-Formular \(Adobe LiveCycle\): OpenIntraPDF zeigt es an/)).toBeInTheDocument();
+    });
+
+    it('ohne XFA kein Hinweis', async () => {
+        await oeffnen(gastgeber());
+        expect(screen.queryByText(/XFA-Formular/)).toBeNull();
+    });
+});
 
 describe('Lesen', () => {
     it('ein Gastgeber ohne speichern hat keinen Bearbeiten-Modus', async () => {

@@ -124,6 +124,7 @@
     },
     "hinweis": {
       "signiert": "Allekirjoitus on olemassa; sen pätevyyttä ei ole tarkistettu. Alkuperäiskappale pysyy muuttumattomana – muokkaus on mahdollista kopiona.",
+      "xfa": "XFA-lomake (Adobe LiveCycle): OpenIntraPDF näyttää sen, mutta ei voi muokata sitä eikä tallentaa sitä täytettynä. Täytä lomake avaamalla se Adobe Acrobat Readerissa.",
       "entwurfVerborgen": "Luonnostasi ei ole vielä tallennettu. Lukunäkymä näyttää tallennetun version; muutokset näet kohdassa ”Muokkaa”.",
       "bericht": "Huomiot tallennuksesta:"
     },

@@ -124,6 +124,7 @@
     },
     "hinweis": {
       "signiert": "Signatur til stede; gyldighed ikke kontrolleret. Originalen forbliver uændret – redigering er mulig som kopi.",
+      "xfa": "XFA-formular (Adobe LiveCycle): OpenIntraPDF viser den, men kan hverken redigere den eller gemme den udfyldt. Åbn den i Adobe Acrobat Reader for at udfylde den.",
       "entwurfVerborgen": "Din kladde er endnu ikke gemt. Læsevisningen viser den gemte version; dine ændringer ses under „Redigér“.",
       "bericht": "Bemærkninger til gemning:"
     },

@@ -124,6 +124,7 @@
     },
     "hinweis": {
       "signiert": "Allkiri on olemas; kehtivust ei ole kontrollitud. Originaal jääb muutmata – muutmine on võimalik koopiana.",
+      "xfa": "XFA-vorm (Adobe LiveCycle): OpenIntraPDF kuvab seda, kuid ei saa seda muuta ega täidetuna salvestada. Täitmiseks avage see rakenduses Adobe Acrobat Reader.",
       "entwurfVerborgen": "Teie mustand ei ole veel salvestatud. Lugemisvaates kuvatakse salvestatud versioon; muudatused näete jaotises „Muuda“.",
       "bericht": "Salvestamise märkused:"
     },

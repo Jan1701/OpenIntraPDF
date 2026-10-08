@@ -154,6 +154,7 @@
     },
     "hinweis": {
       "signiert": "Podpis obecny; ważność nie została sprawdzona. Oryginał pozostaje niezmieniony – edycja jest możliwa jako kopia.",
+      "xfa": "Formularz XFA (Adobe LiveCycle): OpenIntraPDF wyświetla go, ale nie może go edytować ani zapisać po wypełnieniu. Aby go wypełnić, otwórz go w programie Adobe Acrobat Reader.",
       "entwurfVerborgen": "Twoja wersja robocza nie została jeszcze zapisana. Widok odczytu pokazuje zapisaną wersję; zmiany zobaczysz w trybie „Edytuj”.",
       "bericht": "Uwagi dotyczące zapisu:"
     },

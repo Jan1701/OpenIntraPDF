@@ -141,6 +141,7 @@
     },
     "hinweis": {
       "signiert": "Paraksts ir pievienots; derīgums nav pārbaudīts. Oriģināls paliek nemainīts – rediģēšana iespējama kā kopijai.",
+      "xfa": "XFA veidlapa (Adobe LiveCycle): OpenIntraPDF to attēlo, taču nevar ne rediģēt, ne saglabāt aizpildītu. Lai aizpildītu, atveriet to programmā Adobe Acrobat Reader.",
       "entwurfVerborgen": "Jūsu melnraksts vēl nav saglabāts. Lasīšanas skatā redzama saglabātā versija; izmaiņas var redzēt sadaļā „Rediģēt”.",
       "bericht": "Norādes par saglabāšanu:"
     },

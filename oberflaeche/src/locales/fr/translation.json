@@ -137,6 +137,7 @@
     },
     "hinweis": {
       "signiert": "Signature présente ; validité non vérifiée. L'original reste inchangé – la modification est possible sous forme de copie.",
+      "xfa": "Formulaire XFA (Adobe LiveCycle) : OpenIntraPDF l'affiche, mais ne peut ni le modifier ni l'enregistrer une fois rempli. Pour le remplir, ouvrez-le dans Adobe Acrobat Reader.",
       "entwurfVerborgen": "Votre brouillon n'a pas encore été enregistré. La vue de lecture affiche la version enregistrée ; vous voyez vos modifications sous « Modifier ».",
       "bericht": "Remarques sur l'enregistrement :"
     },

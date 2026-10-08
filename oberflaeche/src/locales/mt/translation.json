@@ -171,6 +171,7 @@
     },
     "hinweis": {
       "signiert": "Teżisti firma; il-validità mhix ivverifikata. L-oriġinal jibqa' mhux mibdul – jista' jiġi editjat bħala kopja.",
+      "xfa": "Formola XFA (Adobe LiveCycle): OpenIntraPDF turiha, imma ma jistax jeditjaha jew isejvjaha mimlija. Biex timlieha, iftaħha f'Adobe Acrobat Reader.",
       "entwurfVerborgen": "L-abbozz tiegħek għadu ma ġiex issejvjat. Il-vista tal-qari turi l-verżjoni ssejvjata; il-bidliet tarahom taħt „Editja”.",
       "bericht": "Noti dwar is-salvataġġ:"
     },

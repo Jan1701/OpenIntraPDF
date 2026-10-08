@@ -137,6 +137,7 @@
     },
     "hinweis": {
       "signiert": "Firma presente; validez no verificada. El original permanece sin cambios; la edición es posible como copia.",
+      "xfa": "Formulario XFA (Adobe LiveCycle): OpenIntraPDF lo muestra, pero no puede editarlo ni guardarlo rellenado. Para rellenarlo, ábralo en Adobe Acrobat Reader.",
       "entwurfVerborgen": "Su borrador aún no se ha guardado. La vista de lectura muestra la versión guardada; los cambios se ven en «Editar».",
       "bericht": "Notas sobre el guardado:"
     },

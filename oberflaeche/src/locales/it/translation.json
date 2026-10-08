@@ -137,6 +137,7 @@
     },
     "hinweis": {
       "signiert": "Firma presente; validità non verificata. L'originale resta invariato – è possibile modificarlo come copia.",
+      "xfa": "Modulo XFA (Adobe LiveCycle): OpenIntraPDF lo visualizza, ma non può né modificarlo né salvarlo compilato. Per compilarlo, aprilo con Adobe Acrobat Reader.",
       "entwurfVerborgen": "La bozza non è ancora stata salvata. La visualizzazione di lettura mostra la versione salvata; le modifiche sono visibili in «Modifica».",
       "bericht": "Note sul salvataggio:"
     },

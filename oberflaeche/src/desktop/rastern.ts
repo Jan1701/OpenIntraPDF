@@ -44,8 +44,8 @@ export function pdfjsRasterer(): Rasterer {
     let dokument: PDFDocumentProxy | null = null;
     return {
         async laden(daten) {
-            const { pdfjs } = await pdfjsLaden();
-            aufgabe = pdfjs.getDocument({ data: new Uint8Array(daten), enableXfa: false });
+            const { pdfjs, dokumentOptionen } = await pdfjsLaden();
+            aufgabe = pdfjs.getDocument({ data: new Uint8Array(daten), ...dokumentOptionen, enableXfa: false });
             dokument = await aufgabe.promise;
         },
         async rastern(seite, dpi) {

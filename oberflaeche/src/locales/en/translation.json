@@ -120,6 +120,7 @@
     },
     "hinweis": {
       "signiert": "Signature present; validity not checked. The original stays unchanged – editing is possible as a copy.",
+      "xfa": "XFA form (Adobe LiveCycle): OpenIntraPDF displays it but can neither edit it nor save it filled in. To fill it in, open it in Adobe Acrobat Reader.",
       "entwurfVerborgen": "Your draft has not been saved yet. The reading view shows the saved version; you can see your changes under “Edit”.",
       "bericht": "Notes on saving:"
     },

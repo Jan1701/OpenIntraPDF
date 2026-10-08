@@ -124,6 +124,7 @@
     },
     "hinweis": {
       "signiert": "Signatur finns; giltigheten är inte kontrollerad. Originalet förblir oförändrat – redigering är möjlig som kopia.",
+      "xfa": "XFA-formulär (Adobe LiveCycle): OpenIntraPDF visar det, men kan varken redigera det eller spara det ifyllt. Öppna det i Adobe Acrobat Reader för att fylla i det.",
       "entwurfVerborgen": "Ditt utkast är inte sparat än. Läsvyn visar den sparade versionen; dina ändringar ser du under ”Redigera”.",
       "bericht": "Information om sparandet:"
     },

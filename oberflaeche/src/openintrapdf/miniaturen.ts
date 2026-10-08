@@ -11,7 +11,7 @@
 
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 
-type ZeichenDokument = Pick<PDFDocumentProxy, 'getPage'>;
+type ZeichenDokument = Pick<PDFDocumentProxy, 'getPage'> & Partial<Pick<PDFDocumentProxy, 'isPureXfa'>>;
 
 export const MINIATUR_BREITE = 150;
 const GLEICHZEITIG = 2;
@@ -116,6 +116,9 @@ export class MiniaturDienst {
     }
 
     private async zeichnen(quelle: number, drehung: number): Promise<MiniaturBild> {
+        // Ein reines XFA-Formular hat auf der Leinwand nichts zu zeichnen (pdf.js
+        // stellt es als HTML-Ebene dar): Platzhalter statt weißer Seite.
+        if (this.dokument.isPureXfa) throw new Error('XFA-Formular: keine Miniatur');
         const seite = await this.dokument.getPage(quelle + 1);
         const roh = seite.getViewport({ scale: 1, rotation: (seite.rotate + drehung) % 360 });
         const massstab = MINIATUR_BREITE / Math.max(1, roh.width);

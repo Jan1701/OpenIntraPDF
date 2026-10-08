@@ -154,6 +154,7 @@
     },
     "hinweis": {
       "signiert": "Yra parašas; galiojimas nepatikrintas. Originalas lieka nepakeistas – redaguoti galima kaip kopiją.",
+      "xfa": "XFA forma (Adobe LiveCycle): OpenIntraPDF ją rodo, bet negali nei redaguoti, nei išsaugoti užpildytos. Norėdami užpildyti, atidarykite ją programoje Adobe Acrobat Reader.",
       "entwurfVerborgen": "Jūsų juodraštis dar neįrašytas. Peržiūros rodinyje matoma įrašyta versija; pakeitimus matysite skirtuke „Redaguoti“.",
       "bericht": "Pastabos dėl įrašymo:"
     },

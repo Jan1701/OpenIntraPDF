@@ -38,6 +38,12 @@ export interface PdfInspektion {
     user_password?: boolean;
     signed?: boolean;
     forms?: boolean;
+    /**
+     * Das Formular hat einen XFA-Teil (Adobe LiveCycle). Seiten, Anmerkungen,
+     * Texterkennung und Extrahieren meldet der Server dann als `unsupported`
+     * (`xfa_form`); angezeigt wird es seit 2345 über pdf.js (`enableXfa`).
+     */
+    xfa?: boolean;
     form_fields?: number;
     attachments?: number;
     bookmarks?: number;

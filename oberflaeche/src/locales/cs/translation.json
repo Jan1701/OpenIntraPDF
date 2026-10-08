@@ -154,6 +154,7 @@
     },
     "hinweis": {
       "signiert": "Podpis je přítomen; platnost nebyla ověřena. Originál zůstává beze změny – úpravy jsou možné jako kopie.",
+      "xfa": "Formulář XFA (Adobe LiveCycle): OpenIntraPDF jej zobrazí, ale nemůže jej upravovat ani uložit vyplněný. K vyplnění jej otevřete v Adobe Acrobat Reader.",
       "entwurfVerborgen": "Váš koncept zatím nebyl uložen. Zobrazení pro čtení ukazuje uloženou verzi; změny uvidíte v režimu „Úpravy“.",
       "bericht": "Poznámky k ukládání:"
     },

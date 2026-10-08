@@ -34,7 +34,49 @@ export interface PdfBibliothek {
     viewer: PdfViewerBausteine;
     /** Inhalt von pdf_viewer.css. */
     viewerStil: string;
+    /**
+     * Gehört in JEDEN getDocument-Aufruf: wo pdf.js seine Hilfsdateien findet
+     * (vite.pdfjs-dateien.ts). Ohne `wasmUrl` bleiben Fax-/JBIG2-Scans und
+     * JPEG-2000-Bilder leer (07.10.2026, work).
+     */
+    dokumentOptionen: PdfjsHilfen;
 }
+
+/** Die Adressen der pdf.js-Hilfsdateien für getDocument. */
+export interface PdfjsHilfen {
+    wasmUrl: string;
+    cMapUrl: string;
+    cMapPacked: true;
+    standardFontDataUrl: string;
+    iccUrl: string;
+}
+
+/**
+ * Adressen relativ zur Seite: Im Hub liegt sie unter /, in der Desktop-App
+ * unter dem Asset-Server der App — beide liefern pdfjs/… mit aus. Ein
+ * Schrägstrich am Ende ist Pflicht, pdf.js hängt die Dateinamen an.
+ */
+export function pdfjsHilfen(basis: string = document.baseURI): PdfjsHilfen {
+    const ordner = (name: string) => new URL(`pdfjs/${name}/`, basis).href;
+    return {
+        wasmUrl: ordner('wasm'),
+        cMapUrl: ordner('cmaps'),
+        cMapPacked: true,
+        standardFontDataUrl: ordner('standard_fonts'),
+        iccUrl: ordner('iccs'),
+    };
+}
+
+/**
+ * XFA-Formulare nur ansehen (seit 2345): pdf.js zeichnet ihre Felder als
+ * echte Eingabefelder, aber OpenIntraPDF kann ein ausgefülltes XFA-Formular
+ * nicht speichern. Wer hineintippt, verlöre seine Eingaben stillschweigend --
+ * deshalb nehmen die Felder keine Maus mehr an (der Hinweisstreifen sagt,
+ * womit man sie ausfüllt).
+ */
+const XFA_NUR_ANSICHT = `
+.xfaLayer input, .xfaLayer textarea, .xfaLayer select, .xfaLayer button { pointer-events: none; }
+`;
 
 let geladen: Promise<PdfBibliothek> | null = null;
 
@@ -47,7 +89,7 @@ export function pdfjsLaden(): Promise<PdfBibliothek> {
             import('pdfjs-dist/web/pdf_viewer.mjs'),
             import('pdfjs-dist/web/pdf_viewer.css?inline'),
         ]);
-        return { pdfjs, viewer, viewerStil: stil.default };
+        return { pdfjs, viewer, viewerStil: stil.default + XFA_NUR_ANSICHT, dokumentOptionen: pdfjsHilfen() };
     })().catch(fehler => {
         // Ein gescheiterter Versuch (Netz weg) darf den nächsten nicht sperren.
         geladen = null;

@@ -175,6 +175,10 @@ type jsPaket struct {
 	Version string `json:"version"`
 	License string `json:"license"`
 	Dir     string `json:"dir"`
+	// TextFile (seit 07.10.2026): eine bestimmte Lizenzdatei statt der Suche
+	// im Paketordner -- fuer Bibliotheken, die ein Paket mitbringt, ohne
+	// selbst eines zu sein (die WebAssembly-Decoder in pdfjs-dist/wasm).
+	TextFile string `json:"text_file"`
 }
 
 func jsTeile(aus, datei string) []Eintrag {
@@ -185,6 +189,9 @@ func jsTeile(aus, datei string) []Eintrag {
 	var liste []Eintrag
 	for _, p := range pakete {
 		text := lizenztextIn(p.Dir)
+		if p.TextFile != "" {
+			text = lesen(p.TextFile)
+		}
 		if text == "" {
 			fehler("kein Lizenztext fuer npm-Paket " + p.Name + " in " + p.Dir)
 		}
